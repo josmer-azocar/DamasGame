@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de recursos">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="01_PresentationLayer">
+      <UniqueIdentifier>{c7c7f020-a5ae-445a-8e3e-abd3d73c3ba9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02_BusinessLogicLayer">
+      <UniqueIdentifier>{5561adf8-bbba-49ce-9e9e-e576e83e1030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03_DataLayer">
+      <UniqueIdentifier>{3145e810-f2c2-4117-9d76-0f1a221b3596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01_PresentationLayer\Headers">
+      <UniqueIdentifier>{def339b9-388d-4f6f-ba79-43f3f3da551e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01_PresentationLayer\Sources">
+      <UniqueIdentifier>{6d4fbbd4-9460-4b3e-8e17-a76b58c3fb3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02_BusinessLogicLayer\Headers">
+      <UniqueIdentifier>{bf26582d-21e3-41ae-ab90-cec92f36ef8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02_BusinessLogicLayer\Sources">
+      <UniqueIdentifier>{91815c87-2cc6-47af-ace6-6c138d97fee8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03_DataLayer\Headers">
+      <UniqueIdentifier>{7b52cd4e-c404-43d1-b3ba-99030eb8a29c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03_DataLayer\Sources">
+      <UniqueIdentifier>{40b2e06a-2412-4af7-a443-ef95d314e535}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DamasGame.cpp">
+      <Filter>01_PresentationLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Board.cpp">
+      <Filter>02_BusinessLogicLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleView.cpp">
+      <Filter>01_PresentationLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="InputHandler.cpp">
+      <Filter>01_PresentationLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>02_BusinessLogicLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveGenerator.cpp">
+      <Filter>02_BusinessLogicLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>02_BusinessLogicLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ComputerPlayer.cpp">
+      <Filter>02_BusinessLogicLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="HumanPlayer.cpp">
+      <Filter>02_BusinessLogicLayer\Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="FileHandler.cpp">
+      <Filter>03_DataLayer\Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Board.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleView.h">
+      <Filter>01_PresentationLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="InputHandler.h">
+      <Filter>01_PresentationLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>01_PresentationLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveGenerator.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComputerPlayer.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="HumanPlayer.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHandler.h">
+      <Filter>03_DataLayer\Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
