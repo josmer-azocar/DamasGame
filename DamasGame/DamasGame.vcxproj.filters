@@ -93,5 +93,8 @@
     <ClInclude Include="FileHandler.h">
       <Filter>03_DataLayer\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="CommonTypes.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

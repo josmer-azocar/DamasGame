@@ -1,19 +1,51 @@
 // DamasGame.cpp : Este archivo contiene la función "main". La ejecución del programa comienza y termina ahí.
 //
 
-#include <iostream>
+// --- Includes Necesarios ---
+#include <iostream> // Para std::cout, std::endl, std::cin
+#include <limits>
+#include "ConsoleView.h"
+#include "Board.h"       // Para la clase Board
+#include "CommonTypes.h" // Para PlayerColor, etc. (aunque Board.h lo incluye)
 
-int main()
-{
-    std::cout << "Hello World!\n";
+// --- Punto de Entrada Principal ---
+int main() {
+    // --- Inicialización ---
+    std::cout << "Iniciando DamasGame...\n";
+
+    // Crear el objeto Board
+    Board gameBoard; // Llama al constructor Board()
+
+    // Inicializar el tablero a la posición estándar
+    gameBoard.InitializeBoard(); // Llama a InitializeBoard()
+
+    std::cout << "Tablero inicializado.\n";
+
+    // --- Visualización Inicial (usando método temporal en Board) ---
+    std::cout << "Mostrando tablero inicial...\n";
+    std::cout << "Presione Enter después de ver el tablero para salir.\n\n";
+
+    // Pausa breve para leer los mensajes antes de limpiar y dibujar
+    std::cin.get(); // Espera un Enter
+
+    // Limpiar la pantalla (o al menos ir arriba) ANTES de dibujar el tablero
+    // Si ClearScreen() está implementado en ConsoleView, lo usaríamos.
+    // Por ahora, usamos GoToXY para dibujar sobre lo anterior.
+    GoToXY(0, 0);
+
+    // Llamar al método DisplayBoard (temporal) del objeto Board
+    // Este método usa las funciones GoToXY, SetConsoleTextColor, etc.
+    gameBoard.DisplayBoard();
+
+    // --- Mensaje Final y Pausa ---
+    // Posicionar cursor debajo del tablero (aproximadamente)
+    GoToXY(0, Board::BOARD_SIZE + 3); // Ajusta este número si es necesario
+
+    std::cout << "\nTablero mostrado. Presione Enter para finalizar...";
+    std::cin.ignore(10000, '\n');
+    std::cin.get(); // Espera el Enter final
+
+    ResetConsoleTextColor(); // Buena práctica al salir
+
+    return 0; // Termina el programa
 }
-
-// Ejecutar programa: Ctrl + F5 o menú Depurar > Iniciar sin depurar
-// Depurar programa: F5 o menú Depurar > Iniciar depuración
-
-// Sugerencias para primeros pasos: 1. Use la ventana del Explorador de soluciones para agregar y administrar archivos
-//   2. Use la ventana de Team Explorer para conectar con el control de código fuente
-//   3. Use la ventana de salida para ver la salida de compilación y otros mensajes
-//   4. Use la ventana Lista de errores para ver los errores
-//   5. Vaya a Proyecto > Agregar nuevo elemento para crear nuevos archivos de código, o a Proyecto > Agregar elemento existente para agregar archivos de código existentes al proyecto
-//   6. En el futuro, para volver a abrir este proyecto, vaya a Archivo > Abrir > Proyecto y seleccione el archivo .sln

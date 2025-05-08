@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h" />
+    <ClInclude Include="CommonTypes.h" />
     <ClInclude Include="ComputerPlayer.h" />
     <ClInclude Include="ConsoleView.h" />
     <ClInclude Include="FileHandler.h" />
