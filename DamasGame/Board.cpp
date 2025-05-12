@@ -1,45 +1,48 @@
 // -----------------------------------------------------------------------------
 // Board.cpp
-// Implementación de la clase Board para el juego de Damas.
+// Implementación de la clase Board, adaptando la lógica de Miguel.
 // -----------------------------------------------------------------------------
 
-// --- Includes ---
-#include "Board.h"       // Incluye la declaración de la clase Board (¡Importante!)
-#include "ConsoleView.h" // Para usar GoToXY, Set/ResetConsoleTextColor en DisplayBoard TEMPORAL
-#include "CommonTypes.h" // Para usar PieceType, PlayerColor
+#include "Board.h"       // Incluye nuestra declaración de la clase Board
+#include "CommonTypes.h" // Para PieceType, PlayerColor
 
-#include <stdexcept>     // Para std::out_of_range (manejo de errores)
-#include <vector>        // Para el parámetro opcional de DisplayBoard (si se usa) y std::vector
-#include <string>        // Para std::string, std::to_string (si se usa)
-#include <iostream>      // Para std::cout, std::endl en DisplayBoard TEMPORAL
-#include <iomanip>       // Para std::setw en DisplayBoard TEMPORAL
-#include <array>         // Asegurarse que está incluido si usamos std::array para mGrid
+#include <stdexcept>     // Para std::out_of_range
+#include <iostream>      // Para std::cout (si necesitamos depurar)
+// NO necesitamos iomanip, sstream, string aquí si DisplayBoard se va.
 
+// NO usaremos "using namespace std;" globalmente.
 
 // --- Implementación del Constructor ---
 Board::Board() {
-    // Estado inicial limpio al crear un tablero.
     ClearBoard();
     ResetPieceCounts();
+    // InitializeBoard(); // Decidimos llamarlo explícitamente desde main/GameManager
 }
 
 // --- Implementación de Métodos Públicos ---
 
+// Adaptación de 'inicializarTablero' de Miguel
 void Board::InitializeBoard() {
-    ClearBoard();       // Asegura tablero vacío.
-    ResetPieceCounts(); // Contadores a cero.
+    ClearBoard();
+    ResetPieceCounts();
 
-    // Coloca las piezas iniciales (CORREGIDO: Negras arriba, Blancas abajo).
-    for (int r = 0; r < BOARD_SIZE; ++r) {
-        for (int c = 0; c < BOARD_SIZE; ++c) {
-            if (IsPlayableSquare(r, c)) { // Solo en casillas jugables
-                if (r < 3) {
-                    // Primeras 3 filas jugables (0, 1, 2 internas / 8, 7, 6 visuales) son para Jugador 1 (Negras)
-                    SetPieceAt(r, c, PieceType::P1_MAN);
+    // Lógica de Miguel para colocar piezas, adaptada a nuestros PieceType
+    // Asumimos que P1 (Negras) empieza arriba, P2 (Blancas) empieza abajo.
+    for (int row = 0; row < BOARD_SIZE; ++row) { // 'fila' -> 'row'
+        for (int col = 0; col < BOARD_SIZE; ++col) { // 'columna' -> 'col'
+            // La condición (row % 2 == col % 2) para casillas claras
+            // o (row % 2 != col % 2) para casillas oscuras es otra forma de verlo.
+            // Si (0,0) es clara, jugables son (row+col)%2 != 0
+            // o (row % 2 != col % 2)
+            if ((row % 2) != (col % 2)) { // Casillas jugables (oscuras, si (0,0) es clara)
+                // Esta es la forma estándar.
+                // La lógica de Miguel (columna = (fila % 2 == 0)) es un poco más enredada
+                // pero logra el mismo efecto de alternar. Usemos la estándar.
+                if (row < 3) { // Primeras 3 filas jugables para Jugador 1 (Negras)
+                    SetPieceAt(row, col, PieceType::P1_MAN);
                 }
-                else if (r >= BOARD_SIZE - 3) { // r >= 5 para 8x8 (5, 6, 7 internas / 3, 2, 1 visuales)
-                    // Últimas 3 filas jugables son para Jugador 2 (Blancas)
-                    SetPieceAt(r, c, PieceType::P2_MAN);
+                else if (row >= BOARD_SIZE - 3) { // Últimas 3 filas jugables para Jugador 2 (Blancas)
+                    SetPieceAt(row, col, PieceType::P2_MAN);
                 }
             }
         }
@@ -50,15 +53,15 @@ PieceType Board::GetPieceAt(int row, int col) const {
     if (!IsWithinBounds(row, col)) {
         return PieceType::EMPTY;
     }
-    return mGrid[row][col]; // Asegúrate que 'mGrid' coincida con Board.h
+    return mGrid[row][col];
 }
 
 void Board::SetPieceAt(int row, int col, PieceType pieceType) {
     if (!IsWithinBounds(row, col)) {
         throw std::out_of_range("Board::SetPieceAt: Coordenadas fuera de rango.");
     }
-    PieceType oldPiece = mGrid[row][col]; // Asegúrate que 'mGrid' coincida con Board.h
-    mGrid[row][col] = pieceType;          // Asegúrate que 'mGrid' coincida con Board.h
+    PieceType oldPiece = mGrid[row][col];
+    mGrid[row][col] = pieceType;
     UpdateCountsForSetPiece(row, col, oldPiece, pieceType);
 }
 
@@ -70,29 +73,41 @@ bool Board::IsPlayableSquare(int row, int col) const {
     if (!IsWithinBounds(row, col)) {
         return false;
     }
-    // Asume (0,0) Blanca -> suma impar (r+c)%2 != 0 es Negra/Jugable
-    return (row + col) % 2 != 0;
+    // Si (0,0) es casilla CLARA (no jugable), entonces las jugables (oscuras) son (row + col) % 2 != 0
+    // O equivalentemente, row % 2 != col % 2
+    return (row % 2) != (col % 2);
 }
 
 int Board::GetPieceCount(PlayerColor player) const {
-    // Asegúrate que 'mPieceCounts' coincida con Board.h
     int playerIndex = (player == PlayerColor::PLAYER_1) ? 0 : ((player == PlayerColor::PLAYER_2) ? 1 : -1);
     if (playerIndex == -1) return 0;
-    return mPieceCounts[playerIndex][0] + mPieceCounts[playerIndex][1]; // MAN + KING
+    return mPieceCounts[playerIndex][0] + mPieceCounts[playerIndex][1];
 }
 
 int Board::GetKingCount(PlayerColor player) const {
-    // Asegúrate que 'mPieceCounts' coincida con Board.h
     int playerIndex = (player == PlayerColor::PLAYER_1) ? 0 : ((player == PlayerColor::PLAYER_2) ? 1 : -1);
     if (playerIndex == -1) return 0;
-    return mPieceCounts[playerIndex][1]; // Índice [1] es KING
+    return mPieceCounts[playerIndex][1];
 }
 
+void Board::PromotePieceIfNecessary(int row, int col) {
+    if (!IsWithinBounds(row, col)) {
+        return;
+    }
+    PieceType currentPiece = GetPieceAt(row, col);
+
+    // P1_MAN (Negras, arriba) corona en BOARD_SIZE - 1 (fila 7)
+    if (currentPiece == PieceType::P1_MAN && row == BOARD_SIZE - 1) {
+        SetPieceAt(row, col, PieceType::P1_KING);
+    }
+    // P2_MAN (Blancas, abajo) corona en 0
+    else if (currentPiece == PieceType::P2_MAN && row == 0) {
+        SetPieceAt(row, col, PieceType::P2_KING);
+    }
+}
 
 // --- Implementación de Métodos Privados ---
-
 void Board::ClearBoard() {
-    // Asegúrate que 'mGrid' coincida con Board.h
     for (int r = 0; r < BOARD_SIZE; ++r) {
         for (int c = 0; c < BOARD_SIZE; ++c) {
             mGrid[r][c] = PieceType::EMPTY;
@@ -101,7 +116,6 @@ void Board::ClearBoard() {
 }
 
 void Board::ResetPieceCounts() {
-    // Asegúrate que 'mPieceCounts' coincida con Board.h
     for (int i = 0; i < 2; ++i) {
         for (int j = 0; j < 2; ++j) {
             mPieceCounts[i][j] = 0;
@@ -110,7 +124,6 @@ void Board::ResetPieceCounts() {
 }
 
 void Board::UpdateCountsForSetPiece(int r, int c, PieceType oldPiece, PieceType newPiece) {
-    // Asegúrate que 'mPieceCounts' coincida con Board.h
     int playerIndexOld = -1, pieceTypeIndexOld = -1;
     if (oldPiece == PieceType::P1_MAN) { playerIndexOld = 0; pieceTypeIndexOld = 0; }
     else if (oldPiece == PieceType::P1_KING) { playerIndexOld = 0; pieceTypeIndexOld = 1; }
@@ -132,54 +145,5 @@ void Board::UpdateCountsForSetPiece(int r, int c, PieceType oldPiece, PieceType 
     }
 }
 
-// --- Implementación de la función DisplayBoard TEMPORAL ---
-// Esta función usa GoToXY, SetConsoleTextColor, etc. que DEBEN estar definidas
-// en alguno de los archivos incluidos arriba (probablemente ConsoleView.h)
-void Board::DisplayBoard() const {
-    GoToXY(0, 0); // Mover cursor al inicio
-
-    // --- Imprimir Coordenadas de Columna (A-H) Alineadas (CORREGIDO) ---
-    ResetConsoleTextColor();
-    std::cout << "   "; // 3 espacios iniciales para la columna de números de fila
-    // Imprimimos cada letra centrada en un bloque de 5 espacios
-    for (int c = 0; c < BOARD_SIZE; ++c) {
-        std::cout << "  " << (char)('A' + c) << "  ";
-    }
-    std::cout << std::endl; // Nueva línea
-
-    // --- Imprimir Filas del Tablero ---
-    for (int r = 0; r < BOARD_SIZE; ++r) {
-        ResetConsoleTextColor();
-        // Imprime número de fila (8 a 1)
-        std::cout << std::setw(2) << (BOARD_SIZE - r) << " ";
-
-        for (int c = 0; c < BOARD_SIZE; ++c) {
-            // Determina el color de fondo de la casilla
-            int squareBgColor = IsPlayableSquare(r, c) ? CONSOLE_COLOR_DARK_GRAY : CONSOLE_COLOR_LIGHT_GRAY;
-
-            // Determina la pieza y su color/símbolo
-            PieceType piece = GetPieceAt(r, c);
-            char symbolToShow = ' ';
-            int pieceFgColor = CONSOLE_COLOR_BLACK;
-
-            if (piece == PieceType::P1_MAN) { symbolToShow = 'o'; pieceFgColor = CONSOLE_COLOR_RED; }
-            else if (piece == PieceType::P1_KING) { symbolToShow = 'O'; pieceFgColor = CONSOLE_COLOR_LIGHT_RED; }
-            else if (piece == PieceType::P2_MAN) { symbolToShow = 'x'; pieceFgColor = CONSOLE_COLOR_BLUE; }
-            else if (piece == PieceType::P2_KING) { symbolToShow = 'X'; pieceFgColor = CONSOLE_COLOR_LIGHT_BLUE; }
-            else { pieceFgColor = squareBgColor; } // Casilla vacía
-
-            // Impresión de la casilla [ S ]
-            ResetConsoleTextColor(); // Color neutro para corchetes
-            std::cout << "[";
-            SetConsoleTextColor(pieceFgColor, squareBgColor); // Colores de pieza/fondo
-            std::cout << " " << symbolToShow << " "; // Símbolo centrado
-            ResetConsoleTextColor(); // Volver a neutro
-            std::cout << "]";
-        }
-        ResetConsoleTextColor(); // Resetear al final de la fila
-        std::cout << std::endl;
-    }
-    ResetConsoleTextColor(); // Asegurar reseteo final
-}
-
+// La función DisplayBoard() YA NO ESTÁ AQUÍ. Se moverá a ConsoleView.cpp.
 // --- Fin de la Implementación de Board ---

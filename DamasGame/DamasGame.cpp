@@ -1,51 +1,32 @@
-// DamasGame.cpp : Este archivo contiene la función "main". La ejecución del programa comienza y termina ahí.
-//
+// -----------------------------------------------------------------------------
+// DamasGame.cpp
+// Punto de entrada principal del programa.
+// Crea e inicia el GameManager.
+// -----------------------------------------------------------------------------
 
-// --- Includes Necesarios ---
-#include <iostream> // Para std::cout, std::endl, std::cin
+#include <iostream>
 #include <limits>
+
 #include "ConsoleView.h"
-#include "Board.h"       // Para la clase Board
-#include "CommonTypes.h" // Para PlayerColor, etc. (aunque Board.h lo incluye)
+#include "InputHandler.h"
+#include "Board.h"
+#include "GameManager.h" // <--- Asegúrate que este include esté
+#include "CommonTypes.h"
 
-// --- Punto de Entrada Principal ---
 int main() {
-    // --- Inicialización ---
-    std::cout << "Iniciando DamasGame...\n";
+    Board gameBoard;
+    ConsoleView view;
+    InputHandler inputHandler;
 
-    // Crear el objeto Board
-    Board gameBoard; // Llama al constructor Board()
+    // Crear el GameManager, pasándole los componentes que necesita
+    GameManager game(gameBoard, view, inputHandler);
 
-    // Inicializar el tablero a la posición estándar
-    gameBoard.InitializeBoard(); // Llama a InitializeBoard()
+    game.RunGameLoop(); // Iniciar el bucle principal del juego
 
-    std::cout << "Tablero inicializado.\n";
+    // El mensaje final ahora lo maneja RunGameLoop
+    GoToXY(0, Board::BOARD_SIZE * 2 + 8); // Mover un poco más abajo
+    ResetConsoleTextColor();
+    // Ya no es necesario el cin.get() aquí porque RunGameLoop lo tiene
 
-    // --- Visualización Inicial (usando método temporal en Board) ---
-    std::cout << "Mostrando tablero inicial...\n";
-    std::cout << "Presione Enter después de ver el tablero para salir.\n\n";
-
-    // Pausa breve para leer los mensajes antes de limpiar y dibujar
-    std::cin.get(); // Espera un Enter
-
-    // Limpiar la pantalla (o al menos ir arriba) ANTES de dibujar el tablero
-    // Si ClearScreen() está implementado en ConsoleView, lo usaríamos.
-    // Por ahora, usamos GoToXY para dibujar sobre lo anterior.
-    GoToXY(0, 0);
-
-    // Llamar al método DisplayBoard (temporal) del objeto Board
-    // Este método usa las funciones GoToXY, SetConsoleTextColor, etc.
-    gameBoard.DisplayBoard();
-
-    // --- Mensaje Final y Pausa ---
-    // Posicionar cursor debajo del tablero (aproximadamente)
-    GoToXY(0, Board::BOARD_SIZE + 3); // Ajusta este número si es necesario
-
-    std::cout << "\nTablero mostrado. Presione Enter para finalizar...";
-    std::cin.ignore(10000, '\n');
-    std::cin.get(); // Espera el Enter final
-
-    ResetConsoleTextColor(); // Buena práctica al salir
-
-    return 0; // Termina el programa
+    return 0;
 }

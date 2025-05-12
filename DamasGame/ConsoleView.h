@@ -1,25 +1,32 @@
-#pragma once
-#include <windows.h> // Asegúrate que estos includes estén
-#include <iostream>
-#include <string>
+#ifndef CONSOLE_VIEW_H
+#define CONSOLE_VIEW_H
 
-// --- DEFINICIONES DE CONSTANTES DE COLOR (Color Constant Definitions) ---
-const int CONSOLE_COLOR_BLACK = 0;  // NEGRO
-const int CONSOLE_COLOR_BLUE = 1;  // AZUL
-const int CONSOLE_COLOR_GREEN = 2;  // VERDE
-const int CONSOLE_COLOR_CYAN = 3;  // CIAN
-const int CONSOLE_COLOR_RED = 4;  // ROJO
-const int CONSOLE_COLOR_MAGENTA = 5;  // MAGENTA
-const int CONSOLE_COLOR_BROWN = 6;  // MARRÓN (en consola suele verse como amarillo oscuro)
-const int CONSOLE_COLOR_LIGHT_GRAY = 7;  // GRIS_CLARO  <--- ¡Esta es la que faltaba!
-const int CONSOLE_COLOR_DARK_GRAY = 8;  // GRIS_OSCURO
-const int CONSOLE_COLOR_LIGHT_BLUE = 9;  // AZUL_CLARO
-const int CONSOLE_COLOR_LIGHT_GREEN = 10; // VERDE_CLARO
-const int CONSOLE_COLOR_LIGHT_CYAN = 11; // CIAN_CLARO
-const int CONSOLE_COLOR_LIGHT_RED = 12; // ROJO_CLARO
-const int CONSOLE_COLOR_LIGHT_MAGENTA = 13; // MAGENTA_CLARO
-const int CONSOLE_COLOR_YELLOW = 14; // AMARILLO
-const int CONSOLE_COLOR_WHITE = 15; // BLANCO
+#include <windows.h> // Para la API de Windows (colores, gotoxy)
+#include <string>
+#include <vector>    // Para menús futuros
+#include <iostream>  // Para std::ostream (aunque no se use directamente en .h)
+
+// Declaración anticipada para evitar include circular si Board necesitara ConsoleView
+class Board; // Necesitamos declarar Board porque DisplayBoard la usa
+// struct GameStats; // Si tuvieras un parámetro GameStats en DisplayBoard
+
+// --- CONSTANTES DE COLOR (Van aquí porque son para la vista) ---
+const int CONSOLE_COLOR_BLACK = 0;
+const int CONSOLE_COLOR_BLUE = 1;
+const int CONSOLE_COLOR_GREEN = 2;
+const int CONSOLE_COLOR_CYAN = 3;
+const int CONSOLE_COLOR_RED = 4;
+const int CONSOLE_COLOR_MAGENTA = 5;
+const int CONSOLE_COLOR_BROWN = 6;
+const int CONSOLE_COLOR_LIGHT_GRAY = 7;
+const int CONSOLE_COLOR_DARK_GRAY = 8;
+const int CONSOLE_COLOR_LIGHT_BLUE = 9;
+const int CONSOLE_COLOR_LIGHT_GREEN = 10;
+const int CONSOLE_COLOR_LIGHT_CYAN = 11;
+const int CONSOLE_COLOR_LIGHT_RED = 12;
+const int CONSOLE_COLOR_LIGHT_MAGENTA = 13;
+const int CONSOLE_COLOR_YELLOW = 14;
+const int CONSOLE_COLOR_WHITE = 15;
 
 // --- FUNCIONES DE UTILIDAD DE CONSOLA ---
 inline void SetConsoleTextColor(int foregroundColor, int backgroundColor = CONSOLE_COLOR_BLACK) {
@@ -38,5 +45,15 @@ inline void GoToXY(int x, int y) {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
 }
 
-// --- AQUÍ VENDRÍA LA DECLARACIÓN DE LA CLASE CONSOLEVIEW ---
-// class ConsoleView { ... };
+// --- Declaración de la Clase ConsoleView ---
+class ConsoleView {
+public:
+    ConsoleView(); // Constructor
+
+    void DisplayBoard(const Board& gameBoard) const; // Dibuja el tablero
+    void DisplayMessage(const std::string& message, bool newLine = true) const;
+    void ClearScreen() const;
+    // void EnableVTModeIfNeeded() const; // Si decidimos usar ANSI más adelante
+};
+
+#endif // CONSOLE_VIEW_H
