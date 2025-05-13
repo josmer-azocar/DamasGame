@@ -2,21 +2,20 @@
 #define INPUT_HANDLER_H
 
 #include <string>
-#include <vector>        // Aunque no usemos vector directamente en los métodos públicos por ahora
-#include "CommonTypes.h" // Para PlayerColor y MUY IMPORTANTE: para la struct MoveInput
-
-// La struct MoveInput debe estar definida en CommonTypes.h para que este archivo la conozca.
-// class Board; // No es necesario si GetPlayerMoveInput no toma un Board& por ahora.
+#include <vector>
+#include "CommonTypes.h" // Para PlayerColor y MoveInput
 
 class InputHandler {
 public:
-    InputHandler(); // Constructor
+    InputHandler();
 
-    // Este método usa MoveInput y PlayerColor, que vienen de CommonTypes.h
     MoveInput GetPlayerMoveInput(PlayerColor currentPlayer);
 
 private:
-    // Métodos privados de ayuda si son necesarios en el futuro
+    // Parsea una coordenada estilo "A1", "h8" a índices internos (fila, columna)
+    // Devuelve true si el parseo es exitoso, false en caso contrario.
+    // rowIdx y colIdx son parámetros de salida.
+    bool ParseCoordinate(const std::string& coordStr, int& rowIdx, int& colIdx); // <--- Asegurar que esta declaración exista
 };
 
 #endif // INPUT_HANDLER_H

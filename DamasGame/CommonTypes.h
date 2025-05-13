@@ -1,15 +1,16 @@
-#pragma once
+﻿#pragma once
 #ifndef COMMON_TYPES_H
 #define COMMON_TYPES_H
 
 #include <string>
 #include <vector>
-#include <map>     // Para el ToNotation de Move (aunque sea placeholder)
-#include <utility> // Para std::pair (si se usa en Move, por ejemplo)
+#include <map>
+#include <utility>
+#include <sstream> // Necesario para std::ostringstream
 
 enum class PlayerColor {
-    PLAYER_1, // Negras/Rojas
-    PLAYER_2, // Blancas/Azules
+    PLAYER_1, // Negras, piezas 'b', 'B'
+    PLAYER_2, // Blancas, piezas 'w', 'W'
     NONE
 };
 
@@ -19,8 +20,6 @@ enum class PieceType {
     EMPTY
 };
 
-// Estructura para la entrada del movimiento del jugador
-// Contiene las coordenadas y banderas de estado.
 struct MoveInput {
     int startRow = -1;
     int startCol = -1;
@@ -28,28 +27,49 @@ struct MoveInput {
     int endCol = -1;
     bool isValidFormat = false;
     bool wantsToExit = false;
+    bool wantsToShowStats = false;
 };
 
-// Estructura para representar un movimiento en el juego
+// Función para convertir coordenadas internas (0-7) a notación A1-H8
+inline std::string ToAlgebraic(int r, int c) {
+    if (r < 0 || r > 7 || c < 0 || c > 7) {
+        return "??";
+    }
+    char colChar = 'A' + c;
+    char rowChar = ('8' - r);
+    std::string s = "";
+    s += colChar;
+    s += rowChar;
+    return s;
+}
+
+// Declaración de PlayerColorToString ANTES de Move para que ToNotation la pueda usar
+inline std::string PlayerColorToString(PlayerColor color);
+
+
 struct Move {
     int startR_ = -1;
     int startC_ = -1;
     int endR_ = -1;
     int endC_ = -1;
     PieceType pieceMoved_ = PieceType::EMPTY;
+    PlayerColor playerColor_ = PlayerColor::NONE; // MIEMBRO AÑADIDO
     bool isCapture_ = false;
-    // std::vector<std::pair<int, int>> capturedPiecesCoords_; // Para capturas m�ltiples
-    // bool causesPromotion_ = false;
 
     Move() = default;
-
     bool IsNull() const { return startR_ == -1; }
 
-    // Placeholder, se mejorar� cuando ConsoleView tenga mapas de coordenadas
-    std::string ToNotation(const std::map<std::pair<int, int>, int>& /*coordsToNumMap = {}*/) const {
+    // Versión corregida de ToNotation sin argumentos
+    std::string ToNotation() const {
         if (IsNull()) return "N/A (Mov. Nulo)";
-        return "De (" + std::to_string(startR_) + "," + std::to_string(startC_) + ") a (" +
-            std::to_string(endR_) + "," + std::to_string(endC_) + ")";
+        std::ostringstream oss;
+        // Asegurarse que PlayerColorToString esté declarada antes o incluir su definición aquí si es pequeña
+        oss << PlayerColorToString(playerColor_) << " movio de "
+            << ToAlgebraic(startR_, startC_) << " a " << ToAlgebraic(endR_, endC_);
+        if (isCapture_) {
+            oss << " (captura)";
+        }
+        return oss.str();
     }
 };
 
@@ -59,12 +79,11 @@ struct GameStats {
     int currentTurnNumber = 1;
 };
 
-// ... (GameResultInfo si la necesitas definida aqu�) ...
-
+// Definición de PlayerColorToString
 inline std::string PlayerColorToString(PlayerColor color) {
     switch (color) {
-    case PlayerColor::PLAYER_1: return "Negras (o)";
-    case PlayerColor::PLAYER_2: return "Blancas (x)";
+    case PlayerColor::PLAYER_1: return "Negras (b)";
+    case PlayerColor::PLAYER_2: return "Blancas (w)";
     case PlayerColor::NONE:     return "NADIE";
     default:                    return "DESCONOCIDO";
     }

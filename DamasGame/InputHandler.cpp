@@ -1,48 +1,103 @@
-#include "InputHandler.h" // Incluye la declaración de esta clase
-#include "CommonTypes.h"  // Para PlayerColor, PlayerColorToString, y MoveInput
+ï»¿#include "InputHandler.h"
+#include "CommonTypes.h" 
 
-#include <iostream>       // Para std::cout, std::cin, std::getline
-#include <string>         // Para std::string
-#include <sstream>        // Para std::stringstream
-#include <limits>         // Para std::numeric_limits
+#include <iostream>       
+#include <string>         
+#include <sstream>        
+#include <limits>         
+#include <algorithm>      
+#include <cctype>         
 
 InputHandler::InputHandler() {
     // Constructor
 }
 
+bool InputHandler::ParseCoordinate(const std::string& coordStr, int& rowIdx, int& colIdx) {
+    if (coordStr.length() != 2) {
+        return false;
+    }
+
+    char colChar = static_cast<char>(std::tolower(coordStr[0]));
+    char rowChar = coordStr[1];
+
+    if (colChar >= 'a' && colChar <= 'h') {
+        colIdx = colChar - 'a';
+    }
+    else {
+        return false;
+    }
+
+    if (rowChar >= '1' && rowChar <= '8') {
+        rowIdx = 8 - (rowChar - '0');
+    }
+    else {
+        return false;
+    }
+    return true;
+}
+
 MoveInput InputHandler::GetPlayerMoveInput(PlayerColor currentPlayer) {
-    MoveInput inputResult; // MoveInput se define en CommonTypes.h
+    MoveInput inputResult;
+    std::string playerDisplayMessage;
 
-    // PlayerColorToString se define en CommonTypes.h
-    std::string playerStr = PlayerColorToString(currentPlayer);
-
-    std::cout << "Turno de " << playerStr
-        << ". Introduce tu movimiento (filaIni colIni filaFin colFin, ej. 2 0 3 1) o 'salir': ";
+    std::cout << "--------------------------------------------------" << std::endl;
+    if (currentPlayer == PlayerColor::PLAYER_1) { // Negras (b)
+        playerDisplayMessage = PlayerColorToString(currentPlayer) + " (Negras - arriba, en filas 8,7,6)";
+        std::cout << "Turno de " << playerDisplayMessage << "." << std::endl;
+        std::cout << "Comandos: 'Origen Destino' (ej: b6 a5), 'stats', o 'salir'." << std::endl;
+        // Ejemplo vÃ¡lido desde la posiciÃ³n inicial: mover pieza Negra de B6 a A5
+        std::cout << "Ejemplo para Negras (b): Mover de B6 a A5 -> Ingresa: b6 a5" << std::endl;
+    }
+    else { // PlayerColor::PLAYER_2 (Blancas w)
+        playerDisplayMessage = PlayerColorToString(currentPlayer) + " (Blancas - abajo, en filas 1,2,3)";
+        std::cout << "Turno de " << playerDisplayMessage << "." << std::endl;
+        std::cout << "Comandos: 'Origen Destino' (ej: c3 b4), 'stats', o 'salir'." << std::endl;
+        // Ejemplo vÃ¡lido desde la posiciÃ³n inicial: mover pieza Blanca de C3 a B4
+        std::cout << "Ejemplo para Blancas (w): Mover de C3 a B4 -> Ingresa: c3 b4" << std::endl;
+    }
+    std::cout << "> ";
 
     std::string lineInput;
-    std::getline(std::cin >> std::ws, lineInput); // Lee la línea completa, std::ws consume espacios iniciales
+    std::getline(std::cin >> std::ws, lineInput);
+
+    std::string originalInputForParsing = lineInput;
+    std::transform(lineInput.begin(), lineInput.end(), lineInput.begin(),
+        [](unsigned char c) { return std::tolower(c); });
 
     if (lineInput == "salir") {
         inputResult.wantsToExit = true;
-        inputResult.isValidFormat = true; // Salir es un formato válido de "acción"
+        return inputResult;
+    }
+    if (lineInput == "stats" || lineInput == "estadisticas") {
+        inputResult.wantsToShowStats = true;
         return inputResult;
     }
 
-    std::stringstream ss(lineInput);
-    // Intenta leer 4 enteros.
-    if (ss >> inputResult.startRow >> inputResult.startCol >> inputResult.endRow >> inputResult.endCol) {
-        // Verifica si hay más datos en la línea después de los 4 números
-        char remainingCharTest;
-        if (ss >> remainingCharTest) { // Si se pudo leer algo más...
-            inputResult.isValidFormat = false; // ...entonces el formato es incorrecto (demasiados datos)
+    std::stringstream ss(originalInputForParsing);
+    std::string startCoordStr, endCoordStr;
+
+    if (ss >> startCoordStr >> endCoordStr) {
+        std::string remainingTest;
+        if (ss >> remainingTest) {
+            inputResult.isValidFormat = false;
         }
         else {
-            inputResult.isValidFormat = true; // Se leyeron exactamente 4 números
+            if (ParseCoordinate(startCoordStr, inputResult.startRow, inputResult.startCol) &&
+                ParseCoordinate(endCoordStr, inputResult.endRow, inputResult.endCol)) {
+                inputResult.isValidFormat = true;
+            }
+            else {
+                inputResult.isValidFormat = false;
+            }
         }
     }
     else {
-        // No se pudieron leer 4 números
         inputResult.isValidFormat = false;
     }
+
+    if (!inputResult.isValidFormat && !inputResult.wantsToExit && !inputResult.wantsToShowStats) {
+        std::cout << "COMANDO/FORMATO INCORRECTO. Use 'Origen Destino' (ej: b6 a5), 'stats' o 'salir'." << std::endl;
+    }
+
     return inputResult;
 }

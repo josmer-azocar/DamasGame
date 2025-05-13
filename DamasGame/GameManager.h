@@ -1,20 +1,18 @@
-// -----------------------------------------------------------------------------
+ï»¿// -----------------------------------------------------------------------------
 // GameManager.h
-// Declaración de la clase GameManager, responsable de orquestar el juego.
+// Declaraciï¿½n de la clase GameManager, responsable de orquestar el juego.
 // -----------------------------------------------------------------------------
 
 #ifndef GAME_MANAGER_H
 #define GAME_MANAGER_H
 
-#include "CommonTypes.h" // Para PlayerColor, MoveInput, GameStats, etc.
-#include "Board.h"       // GameManager tendrá un Board
-// class MoveGenerator; // Comentado o borrado si incluimos el .h
+#include "CommonTypes.h" 
+#include "Board.h"       
 #include "MoveGenerator.h" 
 
-// Declaraciones anticipadas para evitar includes circulares
+// Declaraciones anticipadas
 class ConsoleView;
 class InputHandler;
-class MoveGenerator; // La necesitaremos pronto
 
 class GameManager {
 public:
@@ -26,16 +24,18 @@ private:
     Board& mGameBoard;
     ConsoleView& mView;
     InputHandler& mInputHandler;
-    MoveGenerator mMoveGenerator; 
+    MoveGenerator mMoveGenerator;
 
     PlayerColor mCurrentPlayer;
     bool mIsGameOver;
-    GameStats mGameStats; // Para las estadísticas que Miguel manejaba
+    GameStats mGameStats;
+    Move mLastMove; // <--- DeclaraciÃ³n aÃ±adida
 
     void ProcessPlayerTurn();
     void SwitchPlayer();
-    bool CheckEndGameConditions(); // Para verificar si alguien ganó o no hay movimientos
-    void AnnounceResult();         // Para mostrar el resultado final
+    void AnnounceResult();
+    void DisplayCurrentStats(); // <--- DeclaraciÃ³n aÃ±adida
+    void DisplayLastMove();     // <--- DeclaraciÃ³n aÃ±adida
 };
 
 #endif // GAME_MANAGER_H
