@@ -34,9 +34,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DamasGame.cpp">
-      <Filter>01_PresentationLayer\Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Board.cpp">
       <Filter>02_BusinessLogicLayer\Sources</Filter>
     </ClCompile>
@@ -64,6 +61,7 @@
     <ClCompile Include="FileHandler.cpp">
       <Filter>03_DataLayer\Sources</Filter>
     </ClCompile>
+    <ClCompile Include="DamasGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h">
