@@ -1,19 +1,22 @@
-﻿#include "ConsoleView.h"
-#include "Board.h"
-#include "CommonTypes.h"
+﻿// ConsoleView.cpp
+
+#include "ConsoleView.h"
+#include "Board.h"       
+#include "CommonTypes.h" 
 
 #include <iostream>
-#include <iomanip>
+#include <iomanip>    
 #include <string>
 #include <vector>
-#include <cstdlib> // Para system() si se usara (tratamos de evitarlo)
+#include <cstdlib>    
+#include <sstream>    // Ya no es necesario para el arte ASCII básico si se usa std::vector<std::string>
 
 ConsoleView::ConsoleView() {
     // Constructor
 }
 
-// Helper para establecer colores globales y limpiar
-void SetAndClear(WORD attributes) {
+// Helper function (no es miembro de la clase, podría estar en un namespace Utils)
+void SetConsoleAttributesAndClear(WORD attributes) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, attributes);
 
@@ -29,35 +32,33 @@ void SetAndClear(WORD attributes) {
 }
 
 void ConsoleView::SetMenuColorsAndClear() const {
-    WORD attributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // Texto blanco brillante
-    attributes |= (CONSOLE_COLOR_MAGENTA << 4); // Fondo MAGENTA
-    SetAndClear(attributes);
+    WORD attributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+    attributes |= (CONSOLE_COLOR_MAGENTA << 4);
+    SetConsoleAttributesAndClear(attributes);
 }
 
 void ConsoleView::SetGameColorsAndClear() const {
-    WORD attributes = CONSOLE_COLOR_LIGHT_GRAY; // Texto gris claro
-    attributes |= (CONSOLE_COLOR_BLACK << 4);  // Fondo NEGRO
-    SetAndClear(attributes);
+    WORD attributes = CONSOLE_COLOR_LIGHT_GRAY;
+    attributes |= (CONSOLE_COLOR_BLACK << 4);
+    SetConsoleAttributesAndClear(attributes);
 }
 
 void ConsoleView::ClearScreen() const {
-    // Esta función simplemente borra con los colores *actualmente establecidos* en la consola.
-    // Para cambiar el esquema de color + borrar, usar SetMenuColorsAndClear o SetGameColorsAndClear.
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hConsole, &csbi); // Obtener atributos actuales
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
     DWORD count;
     DWORD cellCount = csbi.dwSize.X * csbi.dwSize.Y;
     COORD homeCoords = { 0, 0 };
     FillConsoleOutputCharacter(hConsole, (TCHAR)' ', cellCount, homeCoords, &count);
-    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, cellCount, homeCoords, &count); // Usar atributos actuales
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, cellCount, homeCoords, &count);
     SetConsoleCursorPosition(hConsole, homeCoords);
 }
 
 void ConsoleView::ClearLines(int startY, int numLines, int consoleWidth) const {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hConsole, &csbi); // Obtener atributos actuales (para el color de fondo del borrado)
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
 
     COORD coord;
     DWORD count;
@@ -68,7 +69,6 @@ void ConsoleView::ClearLines(int startY, int numLines, int consoleWidth) const {
         FillConsoleOutputAttribute(hConsole, csbi.wAttributes, consoleWidth, coord, &count);
     }
 }
-
 
 void ConsoleView::DisplayMessage(const std::string& message, bool newLine, int fgColor, int bgColor) const {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -83,34 +83,52 @@ void ConsoleView::DisplayMessage(const std::string& message, bool newLine, int f
     if (newLine) {
         std::cout << std::endl;
     }
-    // No resetear aquí, la próxima llamada a SetConsoleTextColor o un reseteo global lo hará.
 }
 
 void ConsoleView::DisplayMainMenu(int selectedOption) const {
-    // Se asume que SetMenuColorsAndClear() ya fue llamado por GameManager
-    GoToXY(0, 0); // Asegurar que empezamos arriba para redibujar si es necesario
+    GoToXY(0, 0);
 
-    std::string title = "M E N U   P R I N C I P A L";
     int consoleWidth = 80;
-    // ... (código para obtener consoleWidth si se desea) ...
+    // Ancho del arte ASCII de "DAMAS" con caracteres básicos
+    // " ######      ###      ### ##   ### ##    ###     #####   "
+    int asciiArtWidth = 58;
+    int titleX = (consoleWidth - asciiArtWidth) / 2;
+    if (titleX < 0) titleX = 0;
 
-    int titleX = (consoleWidth - static_cast<int>(title.length())) / 2;
-    GoToXY(titleX, 3);
-    DisplayMessage(title, true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_MAGENTA);
-    GoToXY(titleX > 2 ? titleX - 2 : 0, 4);
-    DisplayMessage("===============================", true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_MAGENTA);
+    int currentY = 2;
+
+    SetConsoleTextColor(CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_MAGENTA);
+
+    std::vector<std::string> artLines = {
+        " ######     ###    ######  ######   ###     #####   ",
+        " ##   ##   ## ##   ##  ##  ##  ##  ## ##   ##   ##  ",
+        " ##   ##  ##   ##  ##  ##  ##  ## ##   ##  ##       ",
+        " ##   ##  #######  ##  ##  ##  ## #######   ###### ",
+        " ##   ##  ##   ##  ##   ####   ## ##   ##        ## ",
+        " ##   ##  ##   ##  ##    ##    ## ##   ##  ##   ##  ",
+        " ######   ##   ##  ##    ##    ## ##   ##   #####   "
+    };
+
+    for (const std::string& artLine : artLines) {
+        GoToXY(titleX, currentY++);
+        std::cout << artLine << std::endl;
+    }
+    // currentY ahora está en la línea DESPUÉS de la última línea del arte ASCII
 
     std::vector<std::string> menuOptions = {
         "1. Jugador vs Jugador",
         "2. Jugador vs Computadora",
         "3. Computadora vs Computadora",
-        "4. Estadisticas (Globales - No implementado)",
+        "4. Estadisticas",
         "5. Salir"
     };
 
-    int startY = 7;
+    int startY = currentY + 1;
     for (size_t i = 0; i < menuOptions.size(); ++i) {
-        GoToXY((consoleWidth - static_cast<int>(menuOptions[i].length())) / 2, startY + static_cast<int>(i) * 2);
+        int optionX = (consoleWidth - static_cast<int>(menuOptions[i].length())) / 2;
+        if (optionX < 0) optionX = 0;
+        GoToXY(optionX, startY + static_cast<int>(i) * 2);
+
         if (static_cast<int>(i) + 1 == selectedOption) {
             DisplayMessage(menuOptions[i], false, CONSOLE_COLOR_BLACK, CONSOLE_COLOR_YELLOW);
         }
@@ -118,19 +136,19 @@ void ConsoleView::DisplayMainMenu(int selectedOption) const {
             DisplayMessage(menuOptions[i], false, CONSOLE_COLOR_WHITE, CONSOLE_COLOR_MAGENTA);
         }
     }
-    // Nueva línea después de la última opción del menú para espaciar
-    std::cout << std::endl;
 
-    GoToXY((consoleWidth - 46) / 2, startY + static_cast<int>(menuOptions.size()) * 2 + 1);
-    DisplayMessage("Use (W/ARRIBA), (S/ABAJO), (ENTER) para seleccionar.", true, CONSOLE_COLOR_LIGHT_CYAN, CONSOLE_COLOR_MAGENTA);
-    // Reset general al color del menú al final, por si acaso
+    int instructionY = startY + static_cast<int>(menuOptions.size()) * 2 + 1;
+    std::string instructionText = "Use (W/ARRIBA), (S/ABAJO), (ENTER) para seleccionar.";
+    int instructionX = (consoleWidth - static_cast<int>(instructionText.length())) / 2;
+    if (instructionX < 0) instructionX = 0;
+    GoToXY(instructionX, instructionY);
+    DisplayMessage(instructionText, true, CONSOLE_COLOR_LIGHT_CYAN, CONSOLE_COLOR_MAGENTA);
+
     SetConsoleTextColor(CONSOLE_COLOR_WHITE, CONSOLE_COLOR_MAGENTA);
 }
 
 void ConsoleView::DisplayBoard(const Board& gameBoard, int gameBgColor) const {
-    // gameBgColor es el color de fondo general de la pantalla de juego (ej. CONSOLE_COLOR_BLACK)
-    // Los bordes y coordenadas usarán un color de texto que contraste con gameBgColor.
-    int borderColor = (gameBgColor == CONSOLE_COLOR_BLACK) ? CONSOLE_COLOR_LIGHT_GRAY : CONSOLE_COLOR_BLACK;
+    int borderColor = (gameBgColor == CONSOLE_COLOR_BLACK) ? CONSOLE_COLOR_WHITE : CONSOLE_COLOR_BLACK;
 
     SetConsoleTextColor(borderColor, gameBgColor);
 
@@ -155,28 +173,37 @@ void ConsoleView::DisplayBoard(const Board& gameBoard, int gameBgColor) const {
         std::cout << std::setw(2) << (Board::BOARD_SIZE - r) << " ";
         std::cout << (char)179;
 
-        for (int c = 0; c < Board::BOARD_SIZE; ++c) {
-            // Colores de las casillas como antes (DARK_GRAY y LIGHT_GRAY)
-            int squareBgColor = gameBoard.IsPlayableSquare(r, c) ? CONSOLE_COLOR_DARK_GRAY : CONSOLE_COLOR_LIGHT_GRAY;
-            PieceType piece = gameBoard.GetPieceAt(r, c);
+        for (int c_loop = 0; c_loop < Board::BOARD_SIZE; ++c_loop) {
+            int squareBgColor = gameBoard.IsPlayableSquare(r, c_loop) ? CONSOLE_COLOR_DARK_GRAY : CONSOLE_COLOR_LIGHT_GRAY;
+            PieceType piece = gameBoard.GetPieceAt(r, c_loop);
             char symbolToShow = ' ';
-            // El color de la pieza debe contrastar con squareBgColor.
-            int pieceFgColor = CONSOLE_COLOR_BLACK; // Default si no hay pieza, para el espacio.
+            int pieceFgColor = CONSOLE_COLOR_BLACK;
 
-            if (piece == PieceType::P1_MAN) { symbolToShow = 'b'; pieceFgColor = CONSOLE_COLOR_RED; }
-            else if (piece == PieceType::P1_KING) { symbolToShow = 'B'; pieceFgColor = CONSOLE_COLOR_LIGHT_RED; }
-            else if (piece == PieceType::P2_MAN) { symbolToShow = 'w'; pieceFgColor = CONSOLE_COLOR_LIGHT_BLUE; }
-            else if (piece == PieceType::P2_KING) { symbolToShow = 'W'; pieceFgColor = CONSOLE_COLOR_CYAN; }
+            // --- CAMBIOS AQUÍ ---
+            if (piece == PieceType::P1_MAN) { // Jugador 1 (Blancas) Peón
+                symbolToShow = 'w';
+                pieceFgColor = CONSOLE_COLOR_BLUE; // O CONSOLE_COLOR_WHITE
+            }
+            else if (piece == PieceType::P1_KING) { // Jugador 1 (Blancas) Dama
+                symbolToShow = 'W';
+                pieceFgColor = CONSOLE_COLOR_LIGHT_BLUE; // O CONSOLE_COLOR_CYAN
+            }
+            else if (piece == PieceType::P2_MAN) { // Jugador 2 (Negras) Peón
+                symbolToShow = 'b';
+                pieceFgColor = CONSOLE_COLOR_RED;
+            }
+            else if (piece == PieceType::P2_KING) { // Jugador 2 (Negras) Dama
+                symbolToShow = 'B';
+                pieceFgColor = CONSOLE_COLOR_LIGHT_RED;
+            }
             else {
-                // Si no hay pieza, el símbolo es ' '. El color del texto para ' ' no importa mucho,
-                // pero para mantener la consistencia, podemos usar el mismo color que el fondo de la casilla.
                 pieceFgColor = squareBgColor;
             }
 
             SetConsoleTextColor(pieceFgColor, squareBgColor);
             std::cout << " " << symbolToShow << " ";
 
-            SetConsoleTextColor(borderColor, gameBgColor); // Borde vertical entre casillas
+            SetConsoleTextColor(borderColor, gameBgColor);
             std::cout << (char)179;
         }
         std::cout << std::endl;
@@ -201,6 +228,5 @@ void ConsoleView::DisplayBoard(const Board& gameBoard, int gameBgColor) const {
         }
         std::cout << std::endl;
     }
-    // Al final de DisplayBoard, resetear al color de texto/fondo del juego.
     SetConsoleTextColor(borderColor, gameBgColor);
 }

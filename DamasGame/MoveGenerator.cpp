@@ -1,12 +1,13 @@
 #include "MoveGenerator.h"
-#include "Board.h"
-#include "CommonTypes.h"
+#include "Board.h"       // Para Board::BOARD_SIZE y métodos de Board
+#include "CommonTypes.h" // Para PieceType, PlayerColor, Move
 
-#include <iostream> // Para std::cout de depuración
 #include <vector>
-#include <algorithm> // Para std::any_of si fuera necesario (no usado aquí aún)
+#include <algorithm> // No se usa std::sort ni std::unique aquí, pero podría ser útil si se quisiera eliminar duplicados (no debería haberlos con esta lógica)
 
-MoveGenerator::MoveGenerator() {}
+MoveGenerator::MoveGenerator() {
+    // Constructor
+}
 
 PlayerColor MoveGenerator::GetPlayerFromPiece(PieceType piece) const {
     if (piece == PieceType::P1_MAN || piece == PieceType::P1_KING) return PlayerColor::PLAYER_1;
@@ -14,26 +15,17 @@ PlayerColor MoveGenerator::GetPlayerFromPiece(PieceType piece) const {
     return PlayerColor::NONE;
 }
 
-// Los métodos FindSimplePawnMoves, FindPawnJumps, FindSimpleKingMoves, FindKingJumps
-// ya estaban bien para ser reutilizados, solo nos aseguramos que tomen player y piece.
-// No necesitan cambios respecto a tu última versión si ya tomaban player y piece.
-// Por completitud, los incluyo (asumiendo que son los mismos que me pasaste).
-
 void MoveGenerator::FindSimplePawnMoves(const Board& gameBoard, int r, int c, PlayerColor player, PieceType piece, std::vector<Move>& moves) const {
     if (piece != PieceType::P1_MAN && piece != PieceType::P2_MAN) return;
-    int forwardDirection = (player == PlayerColor::PLAYER_1) ? 1 : -1; // P1 (Negras) mueve hacia abajo (incrementa fila), P2 (Blancas) hacia arriba (decrementa fila)
 
-    // Direcciones diagonales relativas
+    int forwardDirection = (player == PlayerColor::PLAYER_1) ? -1 : 1;
     int dCols[] = { -1, 1 };
 
     for (int dc : dCols) {
         int endRow = r + forwardDirection;
         int endCol = c + dc;
         if (gameBoard.IsWithinBounds(endRow, endCol) && gameBoard.GetPieceAt(endRow, endCol) == PieceType::EMPTY) {
-            Move m;
-            m.startR_ = r; m.startC_ = c; m.endR_ = endRow; m.endC_ = endCol;
-            m.pieceMoved_ = piece; m.playerColor_ = player; m.isCapture_ = false;
-            moves.push_back(m);
+            moves.push_back({ r, c, endRow, endCol, piece, player, false });
         }
     }
 }
@@ -45,57 +37,38 @@ void MoveGenerator::FindPawnJumps(const Board& gameBoard, int r, int c, PlayerCo
     PieceType opponentPawn = (opponentColor == PlayerColor::PLAYER_1) ? PieceType::P1_MAN : PieceType::P2_MAN;
     PieceType opponentKing = (opponentColor == PlayerColor::PLAYER_1) ? PieceType::P1_KING : PieceType::P2_KING;
 
-    // Los peones solo saltan hacia adelante.
-    // La dirección de "adelante" depende del jugador.
-    // P1 (Negras, asumiendo que empiezan arriba y mueven a filas mayores): forwardDirection = 1
-    // P2 (Blancas, asumiendo que empiezan abajo y mueven a filas menores): forwardDirection = -1
-    int forwardDirection = (player == PlayerColor::PLAYER_1) ? 1 : -1;
-
-    // Desplazamientos para el salto: [fila_captura, col_captura, fila_aterrizaje, col_aterrizaje]
-    // relativo a la posición actual (r,c)
-    int jumpOffsets[][4] = {
-        {forwardDirection, -1, 2 * forwardDirection, -2}, // Salto adelante-izquierda
-        {forwardDirection,  1, 2 * forwardDirection,  2}  // Salto adelante-derecha
-    };
+    int forwardDirection = (player == PlayerColor::PLAYER_1) ? -1 : 1;
+    int jumpOffsets[][2] = { {forwardDirection, -1}, {forwardDirection, 1} }; // {dRow_capture, dCol_capture}
 
     for (const auto& offset : jumpOffsets) {
         int capturedRow = r + offset[0];
         int capturedCol = c + offset[1];
-        int landingRow = r + offset[2];
-        int landingCol = c + offset[3];
+        int landingRow = r + 2 * offset[0];
+        int landingCol = c + 2 * offset[1];
 
         if (gameBoard.IsWithinBounds(landingRow, landingCol) &&
             gameBoard.GetPieceAt(landingRow, landingCol) == PieceType::EMPTY) {
-
-            // Verificar que la casilla de captura esté dentro de los límites también
             if (gameBoard.IsWithinBounds(capturedRow, capturedCol)) {
                 PieceType pieceAtCapturedPos = gameBoard.GetPieceAt(capturedRow, capturedCol);
                 if (pieceAtCapturedPos == opponentPawn || pieceAtCapturedPos == opponentKing) {
-                    Move m;
-                    m.startR_ = r; m.startC_ = c; m.endR_ = landingRow; m.endC_ = landingCol;
-                    m.pieceMoved_ = piece; m.playerColor_ = player; m.isCapture_ = true;
-                    moves.push_back(m);
+                    moves.push_back({ r, c, landingRow, landingCol, piece, player, true });
                 }
             }
         }
     }
 }
 
-
 void MoveGenerator::FindSimpleKingMoves(const Board& gameBoard, int r, int c, PlayerColor player, PieceType piece, std::vector<Move>& moves) const {
     if (piece != PieceType::P1_KING && piece != PieceType::P2_KING) return;
 
-    int dRows[] = { -1, -1, 1, 1 }; // Arriba-Izquierda, Arriba-Derecha, Abajo-Izquierda, Abajo-Derecha
-    int dCols[] = { -1,  1, -1, 1 };
+    int dRows[] = { -1, -1,  1,  1 };
+    int dCols[] = { -1,  1, -1,  1 };
 
     for (int i = 0; i < 4; ++i) {
         int endRow = r + dRows[i];
         int endCol = c + dCols[i];
         if (gameBoard.IsWithinBounds(endRow, endCol) && gameBoard.GetPieceAt(endRow, endCol) == PieceType::EMPTY) {
-            Move m;
-            m.startR_ = r; m.startC_ = c; m.endR_ = endRow; m.endC_ = endCol;
-            m.pieceMoved_ = piece; m.playerColor_ = player; m.isCapture_ = false;
-            moves.push_back(m);
+            moves.push_back({ r, c, endRow, endCol, piece, player, false });
         }
     }
 }
@@ -107,10 +80,10 @@ void MoveGenerator::FindKingJumps(const Board& gameBoard, int r, int c, PlayerCo
     PieceType opponentPawn = (opponentColor == PlayerColor::PLAYER_1) ? PieceType::P1_MAN : PieceType::P2_MAN;
     PieceType opponentKing = (opponentColor == PlayerColor::PLAYER_1) ? PieceType::P1_KING : PieceType::P2_KING;
 
-    int dRows[] = { -1, -1,  1, 1 }; // Cambios en fila para pieza capturada
-    int dCols[] = { -1,  1, -1, 1 }; // Cambios en columna para pieza capturada
+    int dRows[] = { -1, -1,  1,  1 };
+    int dCols[] = { -1,  1, -1,  1 };
 
-    for (int i = 0; i < 4; ++i) { // 4 direcciones diagonales
+    for (int i = 0; i < 4; ++i) {
         int capturedRow = r + dRows[i];
         int capturedCol = c + dCols[i];
         int landingRow = r + 2 * dRows[i];
@@ -118,29 +91,23 @@ void MoveGenerator::FindKingJumps(const Board& gameBoard, int r, int c, PlayerCo
 
         if (gameBoard.IsWithinBounds(landingRow, landingCol) &&
             gameBoard.GetPieceAt(landingRow, landingCol) == PieceType::EMPTY) {
-
-            // Verificar que la casilla de captura esté dentro de los límites también
             if (gameBoard.IsWithinBounds(capturedRow, capturedCol)) {
                 PieceType pieceAtCapturedPos = gameBoard.GetPieceAt(capturedRow, capturedCol);
                 if (pieceAtCapturedPos == opponentPawn || pieceAtCapturedPos == opponentKing) {
-                    Move m;
-                    m.startR_ = r; m.startC_ = c; m.endR_ = landingRow; m.endC_ = landingCol;
-                    m.pieceMoved_ = piece; m.playerColor_ = player; m.isCapture_ = true;
-                    moves.push_back(m);
+                    moves.push_back({ r, c, landingRow, landingCol, piece, player, true });
                 }
             }
         }
     }
 }
 
-// --- IMPLEMENTACIÓN DE LA NUEVA FUNCIÓN ---
 std::vector<Move> MoveGenerator::GetPossibleJumpsForSpecificPiece(const Board& gameBoard, int pieceRow, int pieceCol) const {
     std::vector<Move> jumps;
     PieceType piece = gameBoard.GetPieceAt(pieceRow, pieceCol);
     PlayerColor player = GetPlayerFromPiece(piece);
 
     if (player == PlayerColor::NONE || piece == PieceType::EMPTY) {
-        return jumps; // Vacío si no hay pieza o no es de un jugador
+        return jumps;
     }
 
     if (piece == PieceType::P1_MAN || piece == PieceType::P2_MAN) {
@@ -153,126 +120,189 @@ std::vector<Move> MoveGenerator::GetPossibleJumpsForSpecificPiece(const Board& g
 }
 
 std::vector<Move> MoveGenerator::GenerateMovesForPiece(const Board& gameBoard, int startRow, int startCol) const {
-    std::vector<Move> allValidMoves;
+    std::vector<Move> generatedMoves; // No usar allValidMoves para evitar confusión con validación global
     PieceType piece = gameBoard.GetPieceAt(startRow, startCol);
     PlayerColor player = GetPlayerFromPiece(piece);
 
     if (player == PlayerColor::NONE || piece == PieceType::EMPTY) {
-        return allValidMoves;
+        return generatedMoves;
     }
 
-    // Primero, buscar saltos (capturas), ya que son obligatorios si existen.
-    // Usamos la nueva función para asegurar que solo obtenemos saltos.
-    allValidMoves = GetPossibleJumpsForSpecificPiece(gameBoard, startRow, startCol);
-
-    // Si no hay saltos, entonces buscar movimientos simples.
-    if (allValidMoves.empty()) {
-        if (piece == PieceType::P1_MAN || piece == PieceType::P2_MAN) {
-            FindSimplePawnMoves(gameBoard, startRow, startCol, player, piece, allValidMoves);
-        }
-        else if (piece == PieceType::P1_KING || piece == PieceType::P2_KING) {
-            FindSimpleKingMoves(gameBoard, startRow, startCol, player, piece, allValidMoves);
+    // Una pieza específica siempre debe saltar si puede, antes de hacer un movimiento simple.
+    if (piece == PieceType::P1_MAN || piece == PieceType::P2_MAN) {
+        FindPawnJumps(gameBoard, startRow, startCol, player, piece, generatedMoves);
+        if (generatedMoves.empty()) { // Solo si no hay saltos para ESTA pieza, buscar simples
+            FindSimplePawnMoves(gameBoard, startRow, startCol, player, piece, generatedMoves);
         }
     }
-    // NOTA: La regla de "Dama tiene prioridad para comer" aún no está implementada aquí.
-    // Esta función actualmente devuelve *todos* los movimientos de *esta pieza*, dando prioridad a sus propios saltos.
-    // La lógica de si el jugador *debe* usar esta pieza u otra (ej. una Dama en vez de un Peón para capturar)
-    // se manejará en un nivel superior o necesitará una reestructuración más profunda aquí.
-    // Por ahora, nos centramos en la captura múltiple de *una pieza dada*.
-    return allValidMoves;
+    else if (piece == PieceType::P1_KING || piece == PieceType::P2_KING) {
+        FindKingJumps(gameBoard, startRow, startCol, player, piece, generatedMoves);
+        if (generatedMoves.empty()) { // Solo si no hay saltos para ESTA pieza, buscar simples
+            FindSimpleKingMoves(gameBoard, startRow, startCol, player, piece, generatedMoves);
+        }
+    }
+    return generatedMoves;
+}
+
+MandatoryActionType MoveGenerator::GetMandatoryActionType(const Board& gameBoard, PlayerColor player, std::vector<Move>& outMandatoryMoves) const {
+    outMandatoryMoves.clear();
+    std::vector<Move> kingJumps;
+    std::vector<Move> pawnJumps;
+
+    for (int r = 0; r < gameBoard.GetBoardSize(); ++r) {
+        for (int c = 0; c < gameBoard.GetBoardSize(); ++c) {
+            PieceType piece = gameBoard.GetPieceAt(r, c);
+            if (GetPlayerFromPiece(piece) == player) {
+                std::vector<Move> jumpsForThisPiece; // Temporal para los saltos de la pieza actual
+                if (piece == PieceType::P1_KING || piece == PieceType::P2_KING) {
+                    FindKingJumps(gameBoard, r, c, player, piece, jumpsForThisPiece);
+                    kingJumps.insert(kingJumps.end(), jumpsForThisPiece.begin(), jumpsForThisPiece.end());
+                }
+                else if (piece == PieceType::P1_MAN || piece == PieceType::P2_MAN) {
+                    FindPawnJumps(gameBoard, r, c, player, piece, jumpsForThisPiece);
+                    pawnJumps.insert(pawnJumps.end(), jumpsForThisPiece.begin(), jumpsForThisPiece.end());
+                }
+            }
+        }
+    }
+
+    if (!kingJumps.empty()) {
+        outMandatoryMoves = kingJumps;
+        return MandatoryActionType::KING_CAPTURE;
+    }
+    if (!pawnJumps.empty()) {
+        outMandatoryMoves = pawnJumps;
+        return MandatoryActionType::PAWN_CAPTURE;
+    }
+
+    return MandatoryActionType::NONE;
 }
 
 bool MoveGenerator::IsValidMove(const Board& gameBoard, int startRow, int startCol, int endRow, int endCol, PlayerColor player, bool& wasCapture) const {
     wasCapture = false;
-    if (!gameBoard.IsWithinBounds(startRow, startCol) || !gameBoard.IsWithinBounds(endRow, endCol)) {
-        // std::cout << "[Debug MG] IsValidMove: Fuera de limites." << std::endl;
-        return false;
-    }
+
+    if (!gameBoard.IsWithinBounds(startRow, startCol) || !gameBoard.IsWithinBounds(endRow, endCol)) return false;
+
     PieceType pieceAtStart = gameBoard.GetPieceAt(startRow, startCol);
-    if (pieceAtStart == PieceType::EMPTY) {
-        // std::cout << "[Debug MG] IsValidMove: Casilla origen vacia." << std::endl;
-        return false;
-    }
+    if (pieceAtStart == PieceType::EMPTY) return false;
+    if (GetPlayerFromPiece(pieceAtStart) != player) return false;
 
-    PlayerColor pieceOwner = GetPlayerFromPiece(pieceAtStart);
-    if (pieceOwner != player) {
-        // std::cout << "[Debug MG] IsValidMove: Jugador no es dueño de la pieza." << std::endl;
-        return false;
-    }
+    std::vector<Move> mandatoryGlobalMoves; // Contendrá los movimientos obligatorios según la prioridad
+    MandatoryActionType requiredAction = GetMandatoryActionType(gameBoard, player, mandatoryGlobalMoves);
 
-    // REGLA DE CAPTURA OBLIGATORIA GENERAL:
-    // Si hay CUALQUIER salto posible en el tablero para el jugador, debe realizar un salto.
-    // Si el movimiento propuesto no es un salto, y hay saltos disponibles, el movimiento no es válido.
-    std::vector<Move> allPossiblePlayerMoves;
-    bool jumpAvailableAnywhere = false;
-    for (int r = 0; r < Board::BOARD_SIZE; ++r) {
-        for (int c = 0; c < Board::BOARD_SIZE; ++c) {
-            if (GetPlayerFromPiece(gameBoard.GetPieceAt(r, c)) == player) {
-                std::vector<Move> jumpsForThisPiece = GetPossibleJumpsForSpecificPiece(gameBoard, r, c);
-                if (!jumpsForThisPiece.empty()) {
-                    jumpAvailableAnywhere = true;
-                    break;
-                }
-            }
-        }
-        if (jumpAvailableAnywhere) break;
-    }
+    // El movimiento propuesto (startRow, startCol) -> (endRow, endCol)
+    // Primero, verificar si este movimiento específico está entre los movimientos elementales de la pieza.
+    // GenerateMovesForPiece devuelve los movimientos que la pieza *puede* hacer, priorizando sus propios saltos.
+    std::vector<Move> elementalMovesForPiece = GenerateMovesForPiece(gameBoard, startRow, startCol);
 
-    // Generar los movimientos para la pieza específica que se intenta mover
-    std::vector<Move> movesForThisPiece = GenerateMovesForPiece(gameBoard, startRow, startCol);
-
-    for (const Move& move : movesForThisPiece) {
-        if (move.endR_ == endRow && move.endC_ == endCol) {
-            // El movimiento está en la lista de movimientos generados para esta pieza.
-            // Ahora, aplicar la regla de captura obligatoria:
-            if (jumpAvailableAnywhere && !move.isCapture_) {
-                // std::cout << "[Debug MG] IsValidMove: Movimiento simple no permitido, hay captura disponible en otra parte." << std::endl;
-                return false; // No es válido si hay un salto disponible en cualquier parte y este no es un salto
-            }
-            wasCapture = move.isCapture_;
-            return true;
+    Move concreteProposedMove;
+    bool isElementalMove = false;
+    for (const auto& elementalMove : elementalMovesForPiece) {
+        if (elementalMove.endR_ == endRow && elementalMove.endC_ == endCol) {
+            concreteProposedMove = elementalMove;
+            isElementalMove = true;
+            break;
         }
     }
-    // std::cout << "[Debug MG] IsValidMove: Movimiento no encontrado en GenerateMovesForPiece." << std::endl;
-    return false;
-}
 
-
-bool MoveGenerator::HasAnyValidMoves(const Board& gameBoard, PlayerColor player) const {
-    bool jumpAvailable = false;
-    // Primero, verificar si hay algún salto disponible (ya que son obligatorios)
-    for (int r = 0; r < Board::BOARD_SIZE; ++r) {
-        for (int c = 0; c < Board::BOARD_SIZE; ++c) {
-            PieceType piece = gameBoard.GetPieceAt(r, c);
-            if (GetPlayerFromPiece(piece) == player) {
-                if (!GetPossibleJumpsForSpecificPiece(gameBoard, r, c).empty()) {
-                    jumpAvailable = true;
-                    break;
-                }
-            }
-        }
-        if (jumpAvailable) break;
+    if (!isElementalMove) {
+        return false; // El movimiento ni siquiera es uno que la pieza pueda hacer elementalmente.
     }
 
-    if (jumpAvailable) return true; // Si hay saltos, hay movimientos válidos.
-
-    // Si no hay saltos, verificar movimientos simples
-    for (int r = 0; r < Board::BOARD_SIZE; ++r) {
-        for (int c = 0; c < Board::BOARD_SIZE; ++c) {
-            PieceType piece = gameBoard.GetPieceAt(r, c);
-            if (GetPlayerFromPiece(piece) == player) {
-                std::vector<Move> simpleMoves;
-                if (piece == PieceType::P1_MAN || piece == PieceType::P2_MAN) {
-                    FindSimplePawnMoves(gameBoard, r, c, player, piece, simpleMoves);
-                }
-                else if (piece == PieceType::P1_KING || piece == PieceType::P2_KING) {
-                    FindSimpleKingMoves(gameBoard, r, c, player, piece, simpleMoves);
-                }
-                if (!simpleMoves.empty()) {
+    // Ahora, aplicar la lógica de obligatoriedad global
+    switch (requiredAction) {
+    case MandatoryActionType::KING_CAPTURE:
+        // Si se requiere captura de Dama, el movimiento propuesto DEBE ser una captura de Dama.
+        // Y DEBE ser uno de los que están en mandatoryGlobalMoves.
+        if (concreteProposedMove.isCapture_ &&
+            (concreteProposedMove.pieceMoved_ == PieceType::P1_KING || concreteProposedMove.pieceMoved_ == PieceType::P2_KING)) {
+            for (const auto& mandatoryKingJump : mandatoryGlobalMoves) {
+                if (mandatoryKingJump.startR_ == startRow && mandatoryKingJump.startC_ == startCol &&
+                    mandatoryKingJump.endR_ == endRow && mandatoryKingJump.endC_ == endCol) {
+                    wasCapture = true;
                     return true;
                 }
             }
+            return false; // Es una captura de Dama, pero no una de las obligatorias listadas (no debería pasar si mandatoryGlobalMoves es correcto)
+        }
+        return false; // No es una captura de Dama, o no es captura.
+
+    case MandatoryActionType::PAWN_CAPTURE:
+        // Si se requiere captura de Peón (porque ninguna Dama puede), el movimiento propuesto DEBE ser una captura de Peón.
+        // Y DEBE ser uno de los que están en mandatoryGlobalMoves.
+        if (concreteProposedMove.isCapture_ &&
+            (concreteProposedMove.pieceMoved_ == PieceType::P1_MAN || concreteProposedMove.pieceMoved_ == PieceType::P2_MAN)) {
+            for (const auto& mandatoryPawnJump : mandatoryGlobalMoves) {
+                if (mandatoryPawnJump.startR_ == startRow && mandatoryPawnJump.startC_ == startCol &&
+                    mandatoryPawnJump.endR_ == endRow && mandatoryPawnJump.endC_ == endCol) {
+                    wasCapture = true;
+                    return true;
+                }
+            }
+            return false; // Es una captura de Peón, pero no una de las obligatorias listadas.
+        }
+        // Si el movimiento propuesto era una captura de Dama, pero la obligación es de Peón, es inválido.
+        // O si era un movimiento simple.
+        return false;
+
+    case MandatoryActionType::NONE:
+        // No hay capturas obligatorias en el tablero. El movimiento propuesto NO debe ser una captura.
+        // GenerateMovesForPiece para la pieza en (startRow, startCol) ya habría priorizado sus propios saltos.
+        // Si concreteProposedMove.isCapture_ es true, significa que la pieza en startRow,startCol PUEDE saltar.
+        // Pero si requiredAction es NONE, significa que NINGUNA pieza en el tablero puede hacer un salto que sea
+        // considerado prioritario (Dama primero, luego Peón).
+        // Esto implica que si esta pieza es la única que puede saltar, ese salto no es "obligatorio" en el sentido
+        // de que podrías mover otra pieza con un movimiento simple. PERO, si eliges mover ESTA pieza,
+        // DEBE saltar si puede.
+        // La lógica de GenerateMovesForPiece ya se encarga de esto: si la pieza puede saltar,
+        // solo devolverá saltos. Si no puede saltar, devolverá simples.
+        // Entonces, si requiredAction es NONE, significa que ninguna pieza tiene un salto que deba hacerse con prioridad.
+        // El movimiento propuesto, si es de esta pieza, ya será el correcto (salto si puede, o simple).
+        // La única condición es que no sea un salto si NO HAY NINGUNA CAPTURA EN EL TABLERO.
+        // GetMandatoryActionType ya nos dijo que no hay capturas (king ni pawn).
+        // Entonces, concreteProposedMove.isCapture_ debe ser false.
+        if (concreteProposedMove.isCapture_) {
+            return false; // No puedes capturar si no hay capturas obligatorias (según GetMandatoryActionType)
+        }
+        wasCapture = false; // Es un movimiento simple
+        return true;        // Y es elementalmente válido para la pieza.
+    }
+    return false; // Default (no debería alcanzarse)
+}
+
+bool MoveGenerator::HasAnyValidMoves(const Board& gameBoard, PlayerColor player) const {
+    std::vector<Move> mandatoryMoves; // Para almacenar los movimientos que cumplen la obligación
+    MandatoryActionType actionType = GetMandatoryActionType(gameBoard, player, mandatoryMoves);
+
+    if (actionType == MandatoryActionType::KING_CAPTURE || actionType == MandatoryActionType::PAWN_CAPTURE) {
+        // Si hay una acción de captura obligatoria (Dama o Peón),
+        // y la lista de mandatoryMoves (que GetMandatoryActionType llena) no está vacía,
+        // entonces el jugador SÍ tiene movimientos válidos.
+        return !mandatoryMoves.empty();
+    }
+
+    // Si actionType es NONE (no hay capturas obligatorias de Dama ni de Peón),
+    // entonces el jugador puede hacer un movimiento simple.
+    // Debemos verificar si existe al menos un movimiento simple.
+    if (actionType == MandatoryActionType::NONE) {
+        for (int r = 0; r < gameBoard.GetBoardSize(); ++r) {
+            for (int c = 0; c < gameBoard.GetBoardSize(); ++c) {
+                PieceType piece = gameBoard.GetPieceAt(r, c);
+                if (GetPlayerFromPiece(piece) == player) {
+                    // Generar movimientos simples para esta pieza
+                    std::vector<Move> simpleMovesForThisPiece;
+                    if (piece == PieceType::P1_MAN || piece == PieceType::P2_MAN) {
+                        FindSimplePawnMoves(gameBoard, r, c, player, piece, simpleMovesForThisPiece);
+                    }
+                    else if (piece == PieceType::P1_KING || piece == PieceType::P2_KING) {
+                        FindSimpleKingMoves(gameBoard, r, c, player, piece, simpleMovesForThisPiece);
+                    }
+                    if (!simpleMovesForThisPiece.empty()) {
+                        return true; // Se encontró al menos un movimiento simple.
+                    }
+                }
+            }
         }
     }
-    return false; // No se encontraron ni saltos ni movimientos simples
+    return false; // No se encontraron movimientos válidos según la prioridad.
 }

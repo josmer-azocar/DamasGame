@@ -26,24 +26,19 @@ void Board::InitializeBoard() {
     ClearBoard();
     ResetPieceCounts();
 
-    // Lógica de Miguel para colocar piezas, adaptada a nuestros PieceType
-    // Asumimos que P1 (Negras) empieza arriba, P2 (Blancas) empieza abajo.
-    for (int row = 0; row < BOARD_SIZE; ++row) { // 'fila' -> 'row'
-        for (int col = 0; col < BOARD_SIZE; ++col) { // 'columna' -> 'col'
-            // La condición (row % 2 == col % 2) para casillas claras
-            // o (row % 2 != col % 2) para casillas oscuras es otra forma de verlo.
-            // Si (0,0) es clara, jugables son (row+col)%2 != 0
-            // o (row % 2 != col % 2)
-            if ((row % 2) != (col % 2)) { // Casillas jugables (oscuras, si (0,0) es clara)
-                // Esta es la forma estándar.
-                // La lógica de Miguel (columna = (fila % 2 == 0)) es un poco más enredada
-                // pero logra el mismo efecto de alternar. Usemos la estándar.
-                if (row < 3) { // Primeras 3 filas jugables para Jugador 1 (Negras)
-                    SetPieceAt(row, col, PieceType::P1_MAN);
-                }
-                else if (row >= BOARD_SIZE - 3) { // Últimas 3 filas jugables para Jugador 2 (Blancas)
+    // P1 (Blancas) empiezan ABAJO (filas de índice alto: 5, 6, 7 si 0 es arriba)
+    // P2 (Negras) empiezan ARRIBA (filas de índice bajo: 0, 1, 2 si 0 es arriba)
+    for (int row = 0; row < BOARD_SIZE; ++row) {
+        for (int col = 0; col < BOARD_SIZE; ++col) {
+            if ((row % 2) != (col % 2)) { // Casillas jugables (oscuras)
+                // --- CAMBIOS AQUÍ ---
+                if (row < 3) { // Primeras 3 filas para Jugador 2 (Negras)
                     SetPieceAt(row, col, PieceType::P2_MAN);
                 }
+                else if (row >= BOARD_SIZE - 3) { // Últimas 3 filas para Jugador 1 (Blancas)
+                    SetPieceAt(row, col, PieceType::P1_MAN);
+                }
+                // --- FIN CAMBIOS ---
             }
         }
     }
@@ -96,12 +91,13 @@ void Board::PromotePieceIfNecessary(int row, int col) {
     }
     PieceType currentPiece = GetPieceAt(row, col);
 
+
     // P1_MAN (Negras, arriba) corona en BOARD_SIZE - 1 (fila 7)
-    if (currentPiece == PieceType::P1_MAN && row == BOARD_SIZE - 1) {
+    if (currentPiece == PieceType::P1_MAN && row == 0) {
         SetPieceAt(row, col, PieceType::P1_KING);
     }
-    // P2_MAN (Blancas, abajo) corona en 0
-    else if (currentPiece == PieceType::P2_MAN && row == 0) {
+    // P2_MAN (Negras, arriba) corona en la fila BOARD_SIZE - 1 (fila inferior del tablero, índice 7)
+    else if (currentPiece == PieceType::P2_MAN && row == BOARD_SIZE - 1) {
         SetPieceAt(row, col, PieceType::P2_KING);
     }
 }
