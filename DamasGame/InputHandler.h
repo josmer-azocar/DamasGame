@@ -5,17 +5,21 @@
 #include <vector>
 #include "CommonTypes.h" // Para PlayerColor y MoveInput
 
+// Para GetMenuChoice
+#include <conio.h> // Para _getch() en Windows
+#define KEY_UP 72    // Códigos de flecha para Windows
+#define KEY_DOWN 80
+#define KEY_ENTER 13
+
 class InputHandler {
 public:
     InputHandler();
 
     MoveInput GetPlayerMoveInput(PlayerColor currentPlayer);
+    int GetMenuChoice(int currentSelection, int numOptions); // NUEVO
 
 private:
-    // Parsea una coordenada estilo "A1", "h8" a índices internos (fila, columna)
-    // Devuelve true si el parseo es exitoso, false en caso contrario.
-    // rowIdx y colIdx son parámetros de salida.
-    bool ParseCoordinate(const std::string& coordStr, int& rowIdx, int& colIdx); // <--- Asegurar que esta declaración exista
+    bool ParseCoordinate(const std::string& coordStr, int& rowIdx, int& colIdx);
 };
 
 #endif // INPUT_HANDLER_H

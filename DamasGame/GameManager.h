@@ -1,24 +1,27 @@
-﻿// -----------------------------------------------------------------------------
-// GameManager.h
-// Declaraci�n de la clase GameManager, responsable de orquestar el juego.
-// -----------------------------------------------------------------------------
-
-#ifndef GAME_MANAGER_H
+﻿#ifndef GAME_MANAGER_H
 #define GAME_MANAGER_H
 
-#include "CommonTypes.h" 
-#include "Board.h"       
-#include "MoveGenerator.h" 
+#include "CommonTypes.h"
+#include "Board.h"
+#include "MoveGenerator.h"
 
-// Declaraciones anticipadas
 class ConsoleView;
 class InputHandler;
+
+enum class GameMode { // NUEVO
+    NONE,
+    PLAYER_VS_PLAYER,
+    PLAYER_VS_COMPUTER,
+    COMPUTER_VS_COMPUTER
+};
 
 class GameManager {
 public:
     GameManager(Board& board, ConsoleView& view, InputHandler& inputHandler);
-    void StartNewGame();
-    void RunGameLoop();
+
+    void InitializeApplication(); // NUEVO: Mostrará el menú y obtendrá el modo
+    void StartNewGame(GameMode mode); // Modificado para aceptar modo
+    void RunGameLoop(); // Se llamará después de seleccionar un modo que inicie un juego
 
 private:
     Board& mGameBoard;
@@ -29,13 +32,21 @@ private:
     PlayerColor mCurrentPlayer;
     bool mIsGameOver;
     GameStats mGameStats;
-    Move mLastMove; // <--- Declaración añadida
+    Move mLastMove;
 
+    bool mInCaptureSequence;
+    int mForcedPieceRow;
+    int mForcedPieceCol;
+
+    GameMode mCurrentGameMode; // NUEVO
+
+    void ShowMainMenu(); // NUEVO: Bucle para manejar el menú principal
     void ProcessPlayerTurn();
     void SwitchPlayer();
     void AnnounceResult();
-    void DisplayCurrentStats(); // <--- Declaración añadida
-    void DisplayLastMove();     // <--- Declaración añadida
+    void DisplayCurrentStats();
+    void DisplayLastMove();
+    void ShowGlobalStats(); // NUEVO (placeholder)
 };
 
 #endif // GAME_MANAGER_H
