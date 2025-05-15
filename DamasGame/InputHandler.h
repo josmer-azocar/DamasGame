@@ -13,13 +13,13 @@
 
 class InputHandler {
 public:
-    InputHandler();
+	InputHandler();
 
-    MoveInput GetPlayerMoveInput(PlayerColor currentPlayer);
-    int GetMenuChoice(int currentSelection, int numOptions); // NUEVO
+	MoveInput GetPlayerMoveInput(PlayerColor currentPlayer);
+	int GetMenuChoice(int currentSelection, int numOptions);
 
 private:
-    bool ParseCoordinate(const std::string& coordStr, int& rowIdx, int& colIdx);
+	bool ParseCoordinate(const std::string& coordStr, int& rowIdx, int& colIdx);
 };
 
 #endif // INPUT_HANDLER_H

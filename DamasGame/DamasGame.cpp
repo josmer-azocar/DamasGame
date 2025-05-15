@@ -5,36 +5,34 @@
 #include "InputHandler.h"
 #include "Board.h"
 #include "GameManager.h"
-// CommonTypes.h es incluido por los otros headers si es necesario
 
 int main() {
-    HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hConsoleOut, &cursorInfo);
-    bool originalCursorVisibility = cursorInfo.bVisible; // Guardar estado original
-    cursorInfo.bVisible = false;
-    SetConsoleCursorInfo(hConsoleOut, &cursorInfo);
+	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO cursorInfo;
+	GetConsoleCursorInfo(hConsoleOut, &cursorInfo);
+	bool originalCursorVisibility = cursorInfo.bVisible; // Guardar estado original
+	cursorInfo.bVisible = false;
+	SetConsoleCursorInfo(hConsoleOut, &cursorInfo);
 
-    Board gameBoard;
-    ConsoleView view;
-    InputHandler inputHandler;
+	Board gameBoard;
+	ConsoleView view;
+	InputHandler inputHandler;
 
-    GameManager game(gameBoard, view, inputHandler);
+	GameManager game(gameBoard, view, inputHandler);
 
-    game.InitializeApplication(); // Esto maneja el menú y los bucles de juego
+	game.InitializeApplication(); // Esto maneja el menú y los bucles de juego
 
-    // Al salir de InitializeApplication (es decir, el usuario eligió "Salir" del menú)
-    // Restaurar cursor y colores de consola
-    cursorInfo.bVisible = originalCursorVisibility;
-    SetConsoleCursorInfo(hConsoleOut, &cursorInfo);
+	// Al salir de InitializeApplication (es decir, el usuario eligió "Salir" del menú)
+	// Restaurar cursor y colores de consola
+	cursorInfo.bVisible = originalCursorVisibility;
+	SetConsoleCursorInfo(hConsoleOut, &cursorInfo);
 
-    // Resetear a colores estándar de la consola (gris claro sobre negro)
-    WORD defaultAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // Gris claro
-    // No se especifica fondo, así que es negro por defecto al limpiar con SetConsoleTextAttribute + system("cls")
-    SetConsoleTextAttribute(hConsoleOut, defaultAttributes);
-    system("cls"); // Limpiar la pantalla una última vez con los colores estándar
+	// Resetear a colores estándar de la consola (gris claro sobre negro)
+	WORD defaultAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // Gris claro
+	SetConsoleTextAttribute(hConsoleOut, defaultAttributes);
+	system("cls"); // Limpiar la pantalla una última vez con los colores estándar
 
-    std::cout << "Gracias por jugar. Programa finalizado." << std::endl;
+	std::cout << "Gracias por jugar. Programa finalizado." << std::endl;
 
-    return 0;
+	return 0;
 }
