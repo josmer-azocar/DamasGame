@@ -4,12 +4,14 @@
 #include "CommonTypes.h"
 #include "Board.h"
 #include "MoveGenerator.h"
-#include <memory> // Para std::unique_ptr
+#include "FileHandler.h" // Ya estaba, necesario para mFileHandler
+#include <memory>        // Para std::unique_ptr
+#include <string>        // Para std::string
 
 // Declaraciones anticipadas
 class ConsoleView;
 class InputHandler;
-class Player;       // Nueva clase base de jugador
+class Player;
 
 enum class GameMode {
 	NONE,
@@ -20,22 +22,21 @@ enum class GameMode {
 
 class GameManager {
 public:
-
 	GameManager(Board& board, ConsoleView& view, InputHandler& inputHandler);
-	~GameManager(); // Necesario para std::unique_ptr a tipos incompletos si se declaran aquí
+	~GameManager();
 
 	void InitializeApplication();
-
 	void StartNewGame();
 	void RunGameLoop();
 
 private:
 	Board& mGameBoard;
 	ConsoleView& mView;
-	InputHandler& mInputHandler; // Usado por el menú y por HumanPlayer
+	InputHandler& mInputHandler;
 	MoveGenerator mMoveGenerator;
+	FileHandler mFileHandler; // Objeto para manejar archivos de resultados
 
-	PlayerColor mCurrentPlayerTurnColor; // Color del jugador cuyo turno es
+	PlayerColor mCurrentPlayerTurnColor;
 	bool mIsGameOver;
 	GameStats mGameStats;
 	Move mLastMove;
@@ -46,18 +47,21 @@ private:
 
 	GameMode mCurrentGameMode;
 
-	// Punteros a los jugadores actuales. Usamos unique_ptr para gestión automática de memoria.
 	std::unique_ptr<Player> m_player1;
 	std::unique_ptr<Player> m_player2;
-	Player* m_currentPlayerObject; // Puntero al objeto Player del turno actual (m_player1 o m_player2)
+	Player* m_currentPlayerObject;
 
+	// Métodos privados
 	void ShowMainMenu();
 	void ProcessPlayerTurn();
 	void SwitchPlayer();
-	void AnnounceResult();
+	void AnnounceResult();      // Aquí se prepararán los datos para GameResult y se guardarán
 	void DisplayCurrentStats();
 	void DisplayLastMove();
-	void ShowGlobalStats();
+	void ShowGlobalStats();     // Usará mFileHandler.displayGameHistory()
+
+	// Helper para obtener fecha y hora actual
+	std::string getCurrentDateTime(const std::string& format);
 };
 
-#endif // GAME_MANAGER_H_MANAGER_H
+#endif // GAME_MANAGER_H
