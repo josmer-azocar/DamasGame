@@ -6,7 +6,7 @@
 #include <algorithm> 
 
 MoveGenerator::MoveGenerator() {
-	// Constructor
+	
 }
 
 PlayerColor MoveGenerator::GetPlayerFromPiece(PieceType piece) const {

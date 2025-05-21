@@ -15,14 +15,14 @@ int main() {
 	SetConsoleCursorInfo(hConsoleOut, &cursorInfo);
 
 	Board gameBoard;
-	ConsoleView view;
+	//ConsoleView view;
 	InputHandler inputHandler;
 
-	GameManager game(gameBoard, view, inputHandler);
+	GameManager game(gameBoard,inputHandler);
 
 	game.InitializeApplication(); // Esto maneja el menú y los bucles de juego
 
-	// Al salir de InitializeApplication (es decir, el usuario eligió "Salir" del menú)
+	
 	// Restaurar cursor y colores de consola
 	cursorInfo.bVisible = originalCursorVisibility;
 	SetConsoleCursorInfo(hConsoleOut, &cursorInfo);
@@ -33,6 +33,6 @@ int main() {
 	system("cls"); // Limpiar la pantalla una última vez con los colores estándar
 
 	std::cout << "Gracias por jugar. Programa finalizado." << std::endl;
-
+	std::cout << "Thanks for playing. program over." << std::endl;
 	return 0;
 }

@@ -1,19 +1,20 @@
-#include "FileHandler.h" // Incluimos nuestro archivo de cabecera
-#include <fstream>       // Necesario para std::ofstream (output file stream) y std::ifstream (input file stream)
-#include <iostream>      // Necesario para std::cout y std::cerr
-#include <string>        // Ya incluido en el .h, pero buena práctica si se usa string aquí directamente
-#include <vector>        // Necesario para std::vector si alguna función lo usara (no es el caso actual, pero útil)
-#include <chrono>        // Necesario para obtener el tiempo actual (aunque usaremos ctime para formatearlo)
-#include <ctime>         // Necesario para time_t, tm, localtime, strftime
+#include "FileHandler.h" 
+#include <fstream>       
+#include <iostream>      
+#include <string>        
+#include <vector>        
+#include <chrono>        
+#include <ctime>         
 
-// Constructor (puede estar vacío)
-FileHandler::FileHandler() {
-    // No se necesita inicialización compleja por ahora
+
+FileHandler::FileHandler(const LocalizationManager& i18n) :
+    m_i18n(i18n)
+{
 }
 
-// Destructor (puede estar vacío)
+
 FileHandler::~FileHandler() {
-    // No se necesita limpieza compleja por ahora
+   
 }
 
 // Implementación para guardar el resultado de la partida
@@ -24,7 +25,7 @@ bool FileHandler::saveGameResult(const GameResult& result) {
 
     // Verificar si el archivo se abrió correctamente
     if (!outputFile.is_open()) {
-        std::cerr << "Error al abrir el archivo de resultados: " << RESULTS_FILENAME << std::endl;
+        std::cerr << m_i18n.GetString("error_opening_results_file") << RESULTS_FILENAME << std::endl;
         return false; // Indicar que falló el guardado
     }
 
@@ -54,14 +55,14 @@ void FileHandler::displayGameHistory() {
     // Esto también verifica si el archivo existe.
     if (!inputFile.is_open()) {
         std::cout << "-----------------------------------" << std::endl;
-        std::cout << "HISTORIAL DE PARTIDAS GUARDADAS" << std::endl;
+        std::cout << m_i18n.GetString("stats_history_title") << std::endl;
         std::cout << "-----------------------------------" << std::endl;
-        std::cout << "No hay historial de partidas guardado aun." << std::endl;
+        std::cout << m_i18n.GetString("stats_no_history") << std::endl;
         return; // Salir de la función si no se puede abrir (o no existe)
     }
 
     std::cout << "-----------------------------------" << std::endl;
-    std::cout << "HISTORIAL DE PARTIDAS GUARDADAS" << std::endl;
+    std::cout << m_i18n.GetString("stats_history_title") << std::endl;
     std::cout << "-----------------------------------" << std::endl;
 
     std::string line;
@@ -77,6 +78,3 @@ void FileHandler::displayGameHistory() {
     std::cout << "-----------------------------------" << std::endl; // Línea de cierre para la visualización
 }
 
-// Nota: Faltaría una función para obtener la fecha y hora actual en el formato "YYYY-MM-DD HH:MM:SS"
-// Podemos agregarla aquí o donde se preparen los datos GameResult antes de llamar a saveGameResult.
-// Es más limpio prepararla antes, en el GameManager.

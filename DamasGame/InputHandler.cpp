@@ -14,20 +14,20 @@
 // Alternativa para _getch() en sistemas no Windows (ej. con ncurses)
 // Si no usas ncurses, esta parte necesitaría una implementación diferente
 // o GetMenuChoice tendría que usar std::cin
-// #include <ncurses.h> // Ejemplo si usaras ncurses
-int _getch() { // Implementación simple con std::cin para no Windows (menos ideal para menús)
+
+int _getch() { 
 	char c = std::cin.get();
-	if (c == '\n' && std::cin.peek() == EOF) { // Evitar problemas con doble enter al final
-		// No hacer nada especial aquí, solo consumir el char
+	if (c == '\n' && std::cin.peek() == EOF) {
+	
 	}
 	// No maneja flechas directamente de esta forma simple
 	return c;
 }
 // Definiciones de teclas para que compile en no-Windows, aunque la funcionalidad de flechas no será la misma
-#define KEY_UP 'W'       // Usar W para arriba
-#define KEY_DOWN 'S'     // Usar S para abajo
-#define KEY_ENTER '\r'   // Enter (puede ser \n o \r según el sistema)
-						 // '\r' es carriage return, a menudo lo que Enter envía
+#define KEY_UP 'W'       
+#define KEY_DOWN 'S'     
+#define KEY_ENTER '\r'  
+						
 #endif
 
 
@@ -72,7 +72,7 @@ MoveInput InputHandler::GetPlayerMoveInput(PlayerColor currentPlayer) {
 	std::transform(lineInput.begin(), lineInput.end(), lineInput.begin(),
 		[](unsigned char c) { return std::tolower(c); }); // Convertir a minúsculas para comandos
 
-	if (lineInput == "salir") {
+	if (lineInput == "salir" || lineInput == "exit") {
 		inputResult.wantsToExit = true;
 		return inputResult;
 	}

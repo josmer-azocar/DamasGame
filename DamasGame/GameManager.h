@@ -1,6 +1,8 @@
 ﻿#ifndef GAME_MANAGER_H
 #define GAME_MANAGER_H
 
+#include "LocalizationManager.h"
+#include "ConsoleView.h"
 #include "CommonTypes.h"
 #include "Board.h"
 #include "MoveGenerator.h"
@@ -13,6 +15,7 @@ class ConsoleView;
 class InputHandler;
 class Player;
 
+
 enum class GameMode {
 	NONE,
 	PLAYER_VS_PLAYER,
@@ -22,7 +25,9 @@ enum class GameMode {
 
 class GameManager {
 public:
-	GameManager(Board& board, ConsoleView& view, InputHandler& inputHandler);
+	
+	GameManager(Board& board, InputHandler& inputHandler);
+	
 	~GameManager();
 
 	void InitializeApplication();
@@ -30,8 +35,10 @@ public:
 	void RunGameLoop();
 
 private:
+	LocalizationManager m_i18n;
+	ConsoleView mView;
 	Board& mGameBoard;
-	ConsoleView& mView;
+	//ConsoleView& mView;
 	InputHandler& mInputHandler;
 	MoveGenerator mMoveGenerator;
 	FileHandler mFileHandler; // Objeto para manejar archivos de resultados

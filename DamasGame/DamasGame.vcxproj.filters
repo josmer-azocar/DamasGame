@@ -32,6 +32,12 @@
     <Filter Include="03_DataLayer\Sources">
       <UniqueIdentifier>{40b2e06a-2412-4af7-a443-ef95d314e535}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01_PresentationLayer\resources">
+      <UniqueIdentifier>{98a54df0-4e3a-49d3-a0a9-ac318f7b5b4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01_PresentationLayer\resources\lang">
+      <UniqueIdentifier>{d2cb30b5-e241-4e51-a66c-ea43250f5cef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Board.cpp">
@@ -62,6 +68,9 @@
       <Filter>03_DataLayer\Sources</Filter>
     </ClCompile>
     <ClCompile Include="DamasGame.cpp" />
+    <ClCompile Include="LocalizationManager.cpp">
+      <Filter>01_PresentationLayer\Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.h">
@@ -71,9 +80,6 @@
       <Filter>01_PresentationLayer\Headers</Filter>
     </ClInclude>
     <ClInclude Include="InputHandler.h">
-      <Filter>01_PresentationLayer\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="GameManager.h">
       <Filter>01_PresentationLayer\Headers</Filter>
     </ClInclude>
     <ClInclude Include="MoveGenerator.h">
@@ -94,5 +100,19 @@
     <ClInclude Include="CommonTypes.h">
       <Filter>02_BusinessLogicLayer\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="LocalizationManager.h">
+      <Filter>01_PresentationLayer\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>02_BusinessLogicLayer\Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\lang\en.json">
+      <Filter>01_PresentationLayer\resources\lang</Filter>
+    </None>
+    <None Include="resources\lang\es.json">
+      <Filter>01_PresentationLayer\resources\lang</Filter>
+    </None>
   </ItemGroup>
 </Project>

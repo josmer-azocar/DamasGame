@@ -3,7 +3,7 @@
 #include "ConsoleView.h"
 #include "Board.h"       
 #include "CommonTypes.h" 
-
+#include "LocalizationManager.h"
 #include <iostream>
 #include <iomanip>    
 #include <string>
@@ -11,8 +11,59 @@
 #include <cstdlib>    
 #include <sstream>   
 
-ConsoleView::ConsoleView() {
+ConsoleView::ConsoleView(const LocalizationManager& i18n) :
 	// Constructor
+	m_i18n(i18n)
+{
+}
+
+void ConsoleView::DisplayLanguageSelectionMenu(int selectedOption,
+	const std::string& title,
+	const std::string& opt1_text,
+	const std::string& opt2_text,
+	const std::string& instruction_text) const {
+	// Asumimos que SetGameColorsAndClear() (fondo negro) ya fue llamado por LocalizationManager
+	GoToXY(0, 0);
+
+	int consoleWidth = 80;
+
+	int titleX = (consoleWidth - static_cast<int>(title.length())) / 2;
+	if (titleX < 0) titleX = 0;
+	GoToXY(titleX, 3);
+	// Título Amarillo sobre el fondo Negro actual
+	DisplayMessage(title, true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
+	GoToXY(titleX > 2 ? titleX - 2 : 0, 4); // Evitar X negativo
+	// Crear una línea de separador que coincida con el largo del título
+	std::string separator(title.length() + 4, '='); // +4 para un poco más de ancho
+	if (titleX > 2) GoToXY(titleX - 2, 4); else GoToXY(0, 4);
+	DisplayMessage(separator, true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
+
+
+	std::vector<std::string> menuOptions = { opt1_text, opt2_text };
+
+	int startY = 7;
+	for (size_t i = 0; i < menuOptions.size(); ++i) {
+		int optionX = (consoleWidth - static_cast<int>(menuOptions[i].length())) / 2;
+		if (optionX < 0) optionX = 0;
+		GoToXY(optionX, startY + static_cast<int>(i) * 2);
+		if (static_cast<int>(i) + 1 == selectedOption) {
+			// Opción seleccionada: Texto Negro sobre Amarillo
+			DisplayMessage(menuOptions[i], false, CONSOLE_COLOR_BLACK, CONSOLE_COLOR_YELLOW);
+		}
+		else {
+			// Opción no seleccionada: Texto Blanco/Gris Claro sobre Negro
+			DisplayMessage(menuOptions[i], false, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
+		}
+	}
+	std::cout << std::endl;
+
+	int instructionY = startY + static_cast<int>(menuOptions.size()) * 2 + 1;
+	int instructionX = (consoleWidth - static_cast<int>(instruction_text.length())) / 2;
+	if (instructionX < 0) instructionX = 0;
+	GoToXY(instructionX, instructionY);
+	DisplayMessage(instruction_text, true, CONSOLE_COLOR_LIGHT_CYAN, CONSOLE_COLOR_BLACK);
+
+	SetConsoleTextColor(CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK); // Color por defecto para el resto
 }
 
 
@@ -114,11 +165,11 @@ void ConsoleView::DisplayMainMenu(int selectedOption) const {
 	}
 
 	std::vector<std::string> menuOptions = {
-		"1. Jugador vs Jugador",
-		"2. Jugador vs Computadora",
-		"3. Computadora vs Computadora",
-		"4. Estadisticas",
-		"5. Salir"
+		m_i18n.GetString("menu_opt_pvp"),
+		m_i18n.GetString("menu_opt_pvc"),
+		m_i18n.GetString("menu_opt_cvc"),
+		m_i18n.GetString("menu_opt_stats"),
+		m_i18n.GetString("menu_opt_exit"),
 	};
 
 	int startY = currentY + 1;
@@ -134,9 +185,9 @@ void ConsoleView::DisplayMainMenu(int selectedOption) const {
 			DisplayMessage(menuOptions[i], false, CONSOLE_COLOR_WHITE, CONSOLE_COLOR_MAGENTA);
 		}
 	}
-
+	
 	int instructionY = startY + static_cast<int>(menuOptions.size()) * 2 + 1;
-	std::string instructionText = "Use (W/ARRIBA), (S/ABAJO), (ENTER) para seleccionar.";
+	std::string instructionText = m_i18n.GetString("menu_instruction");
 	int instructionX = (consoleWidth - static_cast<int>(instructionText.length())) / 2;
 	if (instructionX < 0) instructionX = 0;
 	GoToXY(instructionX, instructionY);

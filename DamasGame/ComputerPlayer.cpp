@@ -1,12 +1,12 @@
 #include "ComputerPlayer.h"
-#include "CommonTypes.h" // Para MoveInput, PieceType, PlayerColorToString, etc.
-#include "Board.h"       // Para Board y sus métodos
+#include "CommonTypes.h" 
+#include "Board.h"       
 
 
 #include <vector>
-#include <algorithm> // Para std::shuffle si se usara, o std::max_element
-#include <chrono>    // Para sembrar el generador aleatorio
-#include <thread>    // Para std::this_thread::sleep_for (simular pensamiento)
+#include <algorithm> 
+#include <chrono>    
+#include <thread>    
 
 ComputerPlayer::ComputerPlayer(PlayerColor color, const MoveGenerator& moveGenerator, int difficulty)
 	: Player(color),
@@ -58,7 +58,7 @@ int ComputerPlayer::EvaluateBoardState(const Board& currentBoard, PlayerColor pe
 			if (c == 0 || c == (currentBoard.GetBoardSize() - 1)) {
 				positionalBonus += edgePenalty;
 			}
-			// Podríamos añadir más bonificaciones/penalizaciones aquí (ej. piezas defendidas, amenazas, etc.)
+			// Podríamos añadir más bonificaciones/penalizaciones aquí 
 
 			if (pieceOwner == perspectiveColor) { // Pieza de la IA (o del jugador cuya perspectiva evaluamos)
 				score += pieceBaseValue + positionalBonus;
@@ -88,7 +88,6 @@ MoveInput ComputerPlayer::GetChosenMoveInput(
 	std::vector<Move> candidateMoves;
 
 	if (isInCaptureSequence) {
-		// Si está en secuencia, availableMandatoryJumpsFromGameManager SÓLO contendrá
 		// los saltos válidos para la pieza en (forcedRow, forcedCol).
 		candidateMoves = availableMandatoryJumpsFromGameManager;
 	}
@@ -174,7 +173,7 @@ MoveInput ComputerPlayer::GetChosenMoveInput(
 		chosenAiMove.isValidFormat = true;
 	}
 	else {
-		// Si después de todo, no se pudo determinar un bestMove (ej. candidateMoves estaba vacío al inicio)
+		// Si después de todo, no se pudo determinar un bestMove 
 		chosenAiMove.isValidFormat = false;
 	}
 

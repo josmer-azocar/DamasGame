@@ -1,15 +1,14 @@
 #pragma once
 
-#include <string> // Necesario para std::string
+#include <string> 
+#include "LocalizationManager.h"
 
-// Definimos una estructura simple para contener los datos de una partida
-// Esto nos ayudará a pasar la información de manera organizada.
 struct GameResult {
     std::string date;
     std::string time;
-    std::string playerTypes; // e.g., "Humano vs Humano", "Computadora vs Computadora"
-    std::string winner;      // e.g., "Negras (b)", "Blancas (w)"
-    std::string reason;      // e.g., "se quedo sin piezas", "salio de la partida"
+    std::string playerTypes; 
+    std::string winner;      
+    std::string reason;      
     int totalTurns;
     int winnerCaptures;
     int loserCaptures;
@@ -17,8 +16,8 @@ struct GameResult {
 
 class FileHandler {
 public:
-    // Constructor y Destructor (pueden estar vacíos por ahora si no se necesita inicialización/limpieza compleja)
-    FileHandler();
+    
+    FileHandler(const LocalizationManager& i18n);
     ~FileHandler();
 
     // Guarda los datos de una partida al final del archivo de resultados
@@ -31,4 +30,5 @@ public:
 private:
     // Nombre del archivo donde se guardarán los resultados
     const std::string RESULTS_FILENAME = "damas_results.txt";
+    const LocalizationManager& m_i18n;
 };

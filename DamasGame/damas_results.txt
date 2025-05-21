@@ -1,1 +1,14 @@
 2025-05-18 08:14:40;Humano vs Humano;Blancas (w);Negras (b) se quedo sin piezas.;39;12;4
+2025-05-20 16:08:09;Computadora vs Computadora;Negras (b);Blancas (w) no tiene movimientos (bloqueado).;40;11;4
+2025-05-20 22:16:10;Humano vs Humano;Negras (b);Blancas (w) salio de la partida.;1;0;0
+2025-05-20 22:16:33;Humano vs Humano;Negras (b);Blancas (w) salio de la partida.;1;0;0
+2025-05-20 22:17:27;Humano vs Humano;Negras (b);Blancas (w) salio de la partida.;1;0;0
+2025-05-21 10:22:31;Computer vs Computer;N/A;El observador salio de la partida.;1;0;0
+2025-05-21 10:22:35;Computer vs Computer;N/A;El observador salio de la partida.;1;0;0
+2025-05-21 10:25:18;Humano vs Computadora;Negras (b);Blancas (w) salio de la partida.;1;0;0
+2025-05-21 10:25:43;Computer vs Computer;N/A;El observador salio de la partida.;6;1;1
+2025-05-21 13:47:09;Human vs Human;Negras (b);Blancas (w) has exited the game.;1;0;0
+2025-05-21 13:51:53;Human vs Human;Negras (b);Blancas (w) has exited the game.;1;0;0
+2025-05-21 14:17:47;Humano vs Humano;Negras (b);Blancas (w) salido de la partida.;1;0;0
+2025-05-21 14:17:52;Computadora vs Computadora;N/A;El observador salio de la partida.;1;0;0
+2025-05-21 14:24:57;Computadora vs Computadora;N/A;El observador salio de la partida.;1;0;0

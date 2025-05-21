@@ -4,7 +4,7 @@
 #include "CommonTypes.h" // Para PieceType, PlayerColor
 
 #include <stdexcept>     // Para std::out_of_range
-#include <iostream>      // Para std::cout (si necesitamos depurar)
+#include <iostream>      // Para std::cout 
 
 
 // --- Implementación del Constructor ---

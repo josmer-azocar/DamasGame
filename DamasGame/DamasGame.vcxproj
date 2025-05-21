@@ -116,6 +116,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\AzocarPC\Documents\GitHub\DamasGame\DamasGame\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -147,6 +149,7 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="HumanPlayer.cpp" />
     <ClCompile Include="InputHandler.cpp" />
+    <ClCompile Include="LocalizationManager.cpp" />
     <ClCompile Include="MoveGenerator.cpp" />
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
@@ -159,8 +162,13 @@
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="HumanPlayer.h" />
     <ClInclude Include="InputHandler.h" />
+    <ClInclude Include="LocalizationManager.h" />
     <ClInclude Include="MoveGenerator.h" />
     <ClInclude Include="Player.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\lang\en.json" />
+    <None Include="resources\lang\es.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

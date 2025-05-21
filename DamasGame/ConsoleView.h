@@ -7,7 +7,7 @@
 #include <iostream>
 
 class Board;
-
+class LocalizationManager;
 // --- CONSTANTES DE COLOR ---
 const int CONSOLE_COLOR_BLACK = 0;
 const int CONSOLE_COLOR_BLUE = 1;
@@ -54,7 +54,7 @@ inline void ResetConsoleColorsToMenuDefault() {
 
 class ConsoleView {
 public:
-	ConsoleView();
+	ConsoleView(const LocalizationManager& i18n);
 
 	// Establece colores y limpia para el MENÚ (fondo morado)
 	void SetMenuColorsAndClear() const;
@@ -73,6 +73,14 @@ public:
 	void ClearScreen() const;
 	// Limpia una sección de la pantalla (útil para mensajes sin borrar todo)
 	void ClearLines(int startY, int numLines, int consoleWidth = 80) const;
+
+	void DisplayLanguageSelectionMenu(int selectedOption,
+		const std::string& title,
+		const std::string& opt1_text,
+		const std::string& opt2_text,
+		const std::string& instruction_text) const;
+private:
+	const LocalizationManager& m_i18n;
 
 };
 
