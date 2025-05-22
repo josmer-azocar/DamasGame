@@ -172,14 +172,14 @@ void GameManager::DisplayCurrentStats() {
 	mView.DisplayMessage(m_i18n.GetString("game_current_turn") + std::to_string(mGameStats.currentTurnNumber), true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
 	int p1p = mGameBoard.GetPieceCount(PlayerColor::PLAYER_1), p1k = mGameBoard.GetKingCount(PlayerColor::PLAYER_1), p1m = p1p - p1k;
 	int p2p = mGameBoard.GetPieceCount(PlayerColor::PLAYER_2), p2k = mGameBoard.GetKingCount(PlayerColor::PLAYER_2), p2m = p2p - p2k;
-	mView.DisplayMessage(PlayerColorToString(PlayerColor::PLAYER_1) + ": " + std::to_string(p1p) + " (" + std::to_string(p1m) + "p, " + std::to_string(p1k) + "D). Capt: " + std::to_string(mGameStats.player1CapturedCount), true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
-	mView.DisplayMessage(PlayerColorToString(PlayerColor::PLAYER_2) + ": " + std::to_string(p2p) + " (" + std::to_string(p2m) + "p, " + std::to_string(p2k) + "D). Capt: " + std::to_string(mGameStats.player2CapturedCount), true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
+	mView.DisplayMessage(PlayerColorToString(PlayerColor::PLAYER_1, m_i18n) + ": " + std::to_string(p1p) + " (" + std::to_string(p1m) + "p, " + std::to_string(p1k) + "D). Capt: " + std::to_string(mGameStats.player1CapturedCount), true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
+	mView.DisplayMessage(PlayerColorToString(PlayerColor::PLAYER_2, m_i18n) + ": " + std::to_string(p2p) + " (" + std::to_string(p2m) + "p, " + std::to_string(p2k) + "D). Capt: " + std::to_string(mGameStats.player2CapturedCount), true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
 	mView.DisplayMessage("-----------------------------", true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
 }
 void GameManager::DisplayLastMove() {
 	int lastMoveY = GAME_TITLE_LINES + BOARD_VISUAL_HEIGHT;
 	GoToXY(0, lastMoveY); mView.ClearLines(lastMoveY, 1, CONSOLE_WIDTH_ASSUMED); GoToXY(0, lastMoveY);
-	if (!mLastMove.IsNull()) { mView.DisplayMessage(m_i18n.GetString("last_move") + mLastMove.ToNotation(), true, CONSOLE_COLOR_WHITE, CONSOLE_COLOR_BLACK); }
+	if (!mLastMove.IsNull()) { mView.DisplayMessage(m_i18n.GetString("last_move") + mLastMove.ToNotation(m_i18n), true, CONSOLE_COLOR_WHITE, CONSOLE_COLOR_BLACK); }
 }
 
 void GameManager::ProcessPlayerTurn() {
@@ -201,11 +201,11 @@ void GameManager::ProcessPlayerTurn() {
 		}
 
 		if (!mInCaptureSequence && !mMoveGenerator.HasAnyValidMoves(mGameBoard, mCurrentPlayerTurnColor)) {
-			mView.DisplayMessage(m_i18n.GetString("player_mention") + PlayerColorToString(mCurrentPlayerTurnColor) + m_i18n.GetString("reason_no_moves"), true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
+			mView.DisplayMessage(m_i18n.GetString("player_mention") + PlayerColorToString(mCurrentPlayerTurnColor, m_i18n) + m_i18n.GetString("reason_no_moves"), true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
 			mGameStats.winner = (mCurrentPlayerTurnColor == PlayerColor::PLAYER_1) ? PlayerColor::PLAYER_2 : PlayerColor::PLAYER_1;
 			mGameStats.reason = GameOverReason::NO_MOVES; mIsGameOver = true; turnActionSuccessfullyCompleted = true; continue;
 		}
-		std::string turnMsg = m_i18n.GetString("turn_of_player") + PlayerColorToString(mCurrentPlayerTurnColor) + ". ";
+		std::string turnMsg = m_i18n.GetString("turn_of_player") + PlayerColorToString(mCurrentPlayerTurnColor, m_i18n) + ". ";
 		if (mInCaptureSequence) { turnMsg += m_i18n.GetString("turn_continue_capture") + ToAlgebraic(mForcedPieceRow, mForcedPieceCol) + "."; }
 		mView.DisplayMessage(turnMsg, true, CONSOLE_COLOR_LIGHT_CYAN, CONSOLE_COLOR_BLACK);
 
@@ -214,7 +214,7 @@ void GameManager::ProcessPlayerTurn() {
 			GoToXY(0, turnMessageY + 1);
 			mView.ClearLines(turnMessageY + 1, 2, CONSOLE_WIDTH_ASSUMED); // Limpiar para mensaje y prompt
 			GoToXY(0, turnMessageY + 1);
-			mView.DisplayMessage(m_i18n.GetString("artificial_inteligence") + "(" + PlayerColorToString(mCurrentPlayerTurnColor) + ")" + m_i18n.GetString("cvc_ia_turn_prompt"), false, CONSOLE_COLOR_DARK_GRAY, CONSOLE_COLOR_BLACK);
+			mView.DisplayMessage(m_i18n.GetString("artificial_inteligence") + "(" + PlayerColorToString(mCurrentPlayerTurnColor, m_i18n) + ")" + m_i18n.GetString("cvc_ia_turn_prompt"), false, CONSOLE_COLOR_DARK_GRAY, CONSOLE_COLOR_BLACK);
 			std::cout << std::endl << "> "; // Mover el prompt ">" a la siguiente línea
 
 			std::string cvc_command_line;
@@ -262,7 +262,7 @@ void GameManager::ProcessPlayerTurn() {
 		GoToXY(0, feedbackY); mView.ClearLines(feedbackY, 8, CONSOLE_WIDTH_ASSUMED); GoToXY(0, feedbackY);
 
 		if (userInput.wantsToExit) {
-			mView.DisplayMessage(m_i18n.GetString("player_mention") + PlayerColorToString(mCurrentPlayerTurnColor) + m_i18n.GetString("player_wants_to_exit"), true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
+			mView.DisplayMessage(m_i18n.GetString("player_mention") + PlayerColorToString(mCurrentPlayerTurnColor, m_i18n) + m_i18n.GetString("player_wants_to_exit"), true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
 			mIsGameOver = true; mGameStats.reason = GameOverReason::PLAYER_EXIT;
 			mGameStats.winner = (mCurrentPlayerTurnColor == PlayerColor::PLAYER_1) ? PlayerColor::PLAYER_2 : PlayerColor::PLAYER_1;
 			turnActionSuccessfullyCompleted = true; mInCaptureSequence = false;
@@ -280,7 +280,7 @@ void GameManager::ProcessPlayerTurn() {
 				if (std::cin.peek() == '\n') std::cin.ignore(); std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 			}
 			else {
-				mView.DisplayMessage(m_i18n.GetString("artificial_inteligence") + "(" + PlayerColorToString(mCurrentPlayerTurnColor) + ")"+ m_i18n.GetString("error_ai_no_move"), true, CONSOLE_COLOR_RED, CONSOLE_COLOR_BLACK);
+				mView.DisplayMessage(m_i18n.GetString("artificial_inteligence") + "(" + PlayerColorToString(mCurrentPlayerTurnColor, m_i18n) + ")"+ m_i18n.GetString("error_ai_no_move"), true, CONSOLE_COLOR_RED, CONSOLE_COLOR_BLACK);
 				mGameStats.winner = (mCurrentPlayerTurnColor == PlayerColor::PLAYER_1) ? PlayerColor::PLAYER_2 : PlayerColor::PLAYER_1;
 				mGameStats.reason = GameOverReason::NO_MOVES; mIsGameOver = true; turnActionSuccessfullyCompleted = true;
 			}
@@ -335,7 +335,7 @@ void GameManager::ProcessPlayerTurn() {
 						if (!mandatoryJumpsForCurrentPlayer.empty()) {
 							specificErrorMessage += m_i18n.GetString("error_must_capture_king2") + "\n";
 							for (const auto& jump_move : mandatoryJumpsForCurrentPlayer) {
-								specificErrorMessage += "  -> " + jump_move.ToNotation() + "\n";
+								specificErrorMessage += "  -> " + jump_move.ToNotation(m_i18n) + "\n";
 							}
 						}
 						else {
@@ -354,7 +354,7 @@ void GameManager::ProcessPlayerTurn() {
 							specificErrorMessage += m_i18n.GetString("error_must_capture_pawn2") + "\n";
 
 							for (const auto& jump_move : mandatoryJumpsForCurrentPlayer) {
-								specificErrorMessage += "  -> " + jump_move.ToNotation() + "\n";
+								specificErrorMessage += "  -> " + jump_move.ToNotation(m_i18n) + "\n";
 							}
 						}
 						else {
@@ -417,10 +417,10 @@ void GameManager::ProcessPlayerTurn() {
 
 			// Mensaje de movimiento realizado
 			if (mCurrentGameMode != GameMode::COMPUTER_VS_COMPUTER || !dynamic_cast<ComputerPlayer*>(m_currentPlayerObject)) {
-				mView.DisplayMessage(m_i18n.GetString("move_successful") + currentMove.ToNotation(), true, CONSOLE_COLOR_LIGHT_GREEN, CONSOLE_COLOR_BLACK);
+				mView.DisplayMessage(m_i18n.GetString("move_successful") + currentMove.ToNotation(m_i18n), true, CONSOLE_COLOR_LIGHT_GREEN, CONSOLE_COLOR_BLACK);
 			}
 			else {
-				mView.DisplayMessage(m_i18n.GetString("artificial_inteligence") + " (" + PlayerColorToString(mCurrentPlayerTurnColor) + ") "+ m_i18n.GetString("done") + currentMove.ToNotation(), true, CONSOLE_COLOR_CYAN, CONSOLE_COLOR_BLACK);
+				mView.DisplayMessage(m_i18n.GetString("artificial_inteligence") + " (" + PlayerColorToString(mCurrentPlayerTurnColor, m_i18n) + ") "+ m_i18n.GetString("done") + currentMove.ToNotation(m_i18n), true, CONSOLE_COLOR_CYAN, CONSOLE_COLOR_BLACK);
 				// No hay pausa de thread aquí, la pausa de CvC es ANTES de obtener el movimiento.
 			}
 			mLastMove = currentMove;
@@ -447,7 +447,7 @@ void GameManager::ProcessPlayerTurn() {
 					// Pero solo si el juego no ha terminado ya por otra razón.
 					if (!mMoveGenerator.HasAnyValidMoves(mGameBoard, opponent)) {
 						mView.DisplayMessage(m_i18n.GetString("game_over_no_pieces_opponent"), true, CONSOLE_COLOR_LIGHT_GREEN, CONSOLE_COLOR_BLACK);
-						mView.DisplayMessage(m_i18n.GetString("player_mention") + PlayerColorToString(opponent) + m_i18n.GetString("reason_no_moves"), true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
+						mView.DisplayMessage(m_i18n.GetString("player_mention") + PlayerColorToString(opponent, m_i18n) + m_i18n.GetString("reason_no_moves"), true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
 						mGameStats.winner = mCurrentPlayerTurnColor; // Gana el jugador actual
 						mGameStats.reason = GameOverReason::NO_MOVES;
 						mIsGameOver = true;
@@ -488,7 +488,7 @@ void GameManager::AnnounceResult() {
 	gameResultData.playerTypes = p1TypeStr + " vs " + p2TypeStr;
 
 	PlayerColor winner = mGameStats.winner;
-	if (winner != PlayerColor::NONE) gameResultData.winner = PlayerColorToString(winner);
+	if (winner != PlayerColor::NONE) gameResultData.winner = PlayerColorToString(winner, m_i18n);
 	else if (mGameStats.reason == GameOverReason::STALEMATE_BY_RULES) gameResultData.winner = m_i18n.GetString("announce_draw");
 	else if (mGameStats.reason == GameOverReason::PLAYER_EXIT && mCurrentGameMode == GameMode::COMPUTER_VS_COMPUTER) gameResultData.winner = "N/A";
 	else gameResultData.winner = "N/A"; // O "Indeterminado"
@@ -501,16 +501,16 @@ void GameManager::AnnounceResult() {
 
 	switch (mGameStats.reason) {
 	case GameOverReason::NO_PIECES:
-		if (loser != PlayerColor::NONE) reasonDisplayStr = PlayerColorToString(loser) + m_i18n.GetString("reason_no_pieces");
+		if (loser != PlayerColor::NONE) reasonDisplayStr = PlayerColorToString(loser, m_i18n) + m_i18n.GetString("reason_no_pieces");
 		else reasonDisplayStr = m_i18n.GetString("reason_player_no_pieces");
 		break;
 	case GameOverReason::NO_MOVES:
-		if (loser != PlayerColor::NONE) reasonDisplayStr = PlayerColorToString(loser) + m_i18n.GetString("reason_no_moves");
+		if (loser != PlayerColor::NONE) reasonDisplayStr = PlayerColorToString(loser, m_i18n) + m_i18n.GetString("reason_no_moves");
 		else reasonDisplayStr = m_i18n.GetString("reason_player_no_moves");
 		break;
 	case GameOverReason::PLAYER_EXIT:
 		if (winner != PlayerColor::NONE && loser != PlayerColor::NONE)
-			reasonDisplayStr = PlayerColorToString(loser) + m_i18n.GetString("reason_exit");
+			reasonDisplayStr = PlayerColorToString(loser, m_i18n) + m_i18n.GetString("reason_exit");
 		else if (mCurrentGameMode == GameMode::COMPUTER_VS_COMPUTER)
 			reasonDisplayStr = m_i18n.GetString("watcher_out");
 		else
@@ -520,8 +520,8 @@ void GameManager::AnnounceResult() {
 	default:
 		if (winner != PlayerColor::NONE && loser != PlayerColor::NONE) {
 			reasonDisplayStr = (mGameBoard.GetPieceCount(loser) == 0) ?
-				PlayerColorToString(loser) + m_i18n.GetString("reason_no_pieces") :
-				PlayerColorToString(loser) + m_i18n.GetString("reason_ended_unspecified");
+				PlayerColorToString(loser, m_i18n) + m_i18n.GetString("reason_no_pieces") :
+				PlayerColorToString(loser, m_i18n) + m_i18n.GetString("reason_ended_unspecified");
 		}
 		else {
 			reasonDisplayStr = m_i18n.GetString("reason_ended_unspecified");
@@ -539,7 +539,7 @@ void GameManager::AnnounceResult() {
 	}
 
 	if (winner != PlayerColor::NONE) {
-		mView.DisplayMessage(m_i18n.GetString("announce_winner") + PlayerColorToString(winner) + "!", true, CONSOLE_COLOR_LIGHT_GREEN, CONSOLE_COLOR_BLACK);
+		mView.DisplayMessage(m_i18n.GetString("announce_winner") + PlayerColorToString(winner, m_i18n) + "!", true, CONSOLE_COLOR_LIGHT_GREEN, CONSOLE_COLOR_BLACK);
 		mView.DisplayMessage(m_i18n.GetString("announce_reason") + gameResultData.reason, true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
 	}
 	else if (gameResultData.winner == m_i18n.GetString("announce_draw")) {

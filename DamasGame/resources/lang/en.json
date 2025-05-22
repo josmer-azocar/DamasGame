@@ -18,7 +18,7 @@
     "game_rules_line1": "Rules: Multiple captures. Queen has capture priority. White (w) starts.",
     "game_rules_line2": "Commands: 'Origin Destination' (e.g., a3 b4), 'stats', 'exit'.",
     "turn_of_player": "Turn of ",
-    "turn_continue_capture": "CONTINUE CAPTURE with piece at {piece_pos}.",
+    "turn_continue_capture": "CONTINUE CAPTURE with piece at ",
     "artificial_inteligence": "AI",
     "cvc_ia_turn_prompt": "is about to move. Press ENTER or type 'stats'/'exit':",
     "cvc_observer_exit": "Exiting CvC game by observer command...",
@@ -59,7 +59,7 @@
     "announce_game_not_started": "Game not started or already ended.",
     "announce_winner": "WINNER: ",
     "announce_reason": "Reason: ",
-    "announce_game_ended_no_winner": "Game ended. {reason_text}",
+    "announce_game_ended_no_winner": "Game ended.",
     "announce_draw": "DRAW. ",
     "announce_game_ended_fallback": "Game ended.",
     "announce_return_to_menu": "Press Enter to return to the main menu...",
@@ -92,5 +92,12 @@
     "language_option_es": "1. Espanol (Spanish)",
     "language_option_en": "2. English",
     "menu_instruction_lang_select": "Use W/S or Arrow Keys, Enter to select.",
-    "error_loading_language": "ERROR: Could not load language file '{lang_code}'. Trying 'en'."
+    "error_loading_language": "ERROR: Could not load language file '{lang_code}'. Trying 'en'.",
+    "player_color_white": "White ones (w)",
+    "player_color_black": "Black ones (b)",
+    "player_color_none": "NO ONE",
+    "player_color_unknown": "UNKNOWN",
+    "move_notation_null": "N/A (null. Mov)",
+    "move_notation_format": "{player_color} moved from {start_pos} to {end_pos}",
+    "move_notation_capture_suffix": "(capture)"
 }

@@ -161,12 +161,14 @@
     <ClInclude Include="FileHandler.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="HumanPlayer.h" />
+    <ClInclude Include="include\nlohmann\json.hpp" />
     <ClInclude Include="InputHandler.h" />
     <ClInclude Include="LocalizationManager.h" />
     <ClInclude Include="MoveGenerator.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
     <None Include="resources\lang\en.json" />
     <None Include="resources\lang\es.json" />
   </ItemGroup>

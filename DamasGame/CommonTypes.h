@@ -1,13 +1,15 @@
-﻿#ifndef COMMON_TYPES_H // Guarda de inclusión INICIO
+﻿#ifndef COMMON_TYPES_H 
 #define COMMON_TYPES_H
 
-#pragma once // Directiva común, pero las guardas son más estándar
+#pragma once 
 
 #include <string>
 #include <vector>
-#include <sstream> // Para std::ostringstream en Move::ToNotation
+#include <sstream> 
 #include <map>     
 #include <utility> 
+
+#include "LocalizationManager.h" 
 
 // Definición de PlayerColor
 enum class PlayerColor {
@@ -18,12 +20,12 @@ enum class PlayerColor {
 
 // Definición de PieceType
 enum class PieceType {
-	P1_MAN, P1_KING, // Piezas del Jugador 1 (Blancas)
-	P2_MAN, P2_KING, // Piezas del Jugador 2 (Negras)
+	P1_MAN, P1_KING,
+	P2_MAN, P2_KING,
 	EMPTY
 };
 
-// Estructura para la entrada de movimiento del jugador
+// Estructura MoveInput
 struct MoveInput {
 	int startRow = -1;
 	int startCol = -1;
@@ -34,7 +36,7 @@ struct MoveInput {
 	bool wantsToShowStats = false;
 };
 
-// Función para convertir coordenadas internas (0-7) a notación A1-H8
+// ToAlgebraic no necesita localización
 inline std::string ToAlgebraic(int r, int c) {
 	if (r < 0 || r > 7 || c < 0 || c > 7) {
 		return "??";
@@ -47,17 +49,19 @@ inline std::string ToAlgebraic(int r, int c) {
 	return s;
 }
 
-// Función para convertir PlayerColor a string
-inline std::string PlayerColorToString(PlayerColor color) {
+// --- PlayerColorToString IMPLEMENTACIÓN INLINE ---
+inline std::string PlayerColorToString(PlayerColor color, const LocalizationManager& i18n) {
+	std::string key;
 	switch (color) {
-	case PlayerColor::PLAYER_1: return "Blancas (w)";
-	case PlayerColor::PLAYER_2: return "Negras (b)";
-	case PlayerColor::NONE:     return "NADIE";
-	default:                    return "DESCONOCIDO";
+	case PlayerColor::PLAYER_1: key = "player_color_white"; break;
+	case PlayerColor::PLAYER_2: key = "player_color_black"; break;
+	case PlayerColor::NONE:     key = "player_color_none"; break;
+	default:                    key = "player_color_unknown"; break;
 	}
+	return i18n.GetString(key); // Llama a LocalizationManager
 }
 
-// Estructura para representar un movimiento
+// Estructura Move
 struct Move {
 	int startR_ = -1;
 	int startC_ = -1;
@@ -70,19 +74,27 @@ struct Move {
 	Move() = default;
 	bool IsNull() const { return startR_ == -1; }
 
-	std::string ToNotation() const {
-		if (IsNull()) return "N/A (Mov. Nulo)";
+	//  ToNotation IMPLEMENTACIÓN INLINE 
+	inline std::string ToNotation(const LocalizationManager& i18n) const {
+		if (IsNull()) return i18n.GetString("move_notation_null");
+
 		std::ostringstream oss;
-		oss << PlayerColorToString(playerColor_) << " movio de "
-			<< ToAlgebraic(startR_, startC_) << " a " << ToAlgebraic(endR_, endC_);
+		std::map<std::string, std::string> replacements;
+
+		replacements["player_color"] = PlayerColorToString(playerColor_, i18n);
+		replacements["start_pos"] = ToAlgebraic(startR_, startC_);
+		replacements["end_pos"] = ToAlgebraic(endR_, endC_);
+
+		oss << i18n.GetString("move_notation_format", replacements);
+
 		if (isCapture_) {
-			oss << " (captura)";
+			oss << " " << i18n.GetString("move_notation_capture_suffix");
 		}
 		return oss.str();
 	}
 };
 
-// Definición de GameOverReason (DENTRO de las guardas)
+// Definición de GameOverReason
 enum class GameOverReason {
 	NONE,
 	NO_PIECES,
@@ -91,7 +103,7 @@ enum class GameOverReason {
 	STALEMATE_BY_RULES
 };
 
-// Definición de GameStats (DENTRO de las guardas)
+// Definición de GameStats
 struct GameStats {
 	int player1CapturedCount = 0;
 	int player2CapturedCount = 0;
@@ -100,4 +112,4 @@ struct GameStats {
 	GameOverReason reason = GameOverReason::NONE;
 };
 
-#endif // COMMON_TYPES_H (Guarda de inclusión FIN)
+#endif // COMMON_TYPES_H

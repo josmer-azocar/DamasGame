@@ -92,6 +92,12 @@
     "language_option_es": "1. Espanol (Spanish)",
     "language_option_en": "2. Ingles (English)",
     "menu_instruction_lang_select": "Use W/S o Flechas, Enter para seleccionar.",
-    "error_loading_language": "ERROR: No se pudo cargar el archivo de idioma '{lang_code}'. Intentando con 'en'."
-
+    "error_loading_language": "ERROR: No se pudo cargar el archivo de idioma '{lang_code}'. Intentando con 'en'.",
+    "player_color_white": "Blancas (w)",
+    "player_color_black": "Negras (b)",
+    "player_color_none": "NADIE",
+    "player_color_unknown": "DESCONOCIDO",
+    "move_notation_null": "N/A (Mov. Nulo)",
+    "move_notation_format": "{player_color} movio de {start_pos} a {end_pos}",
+    "move_notation_capture_suffix": "(captura)"
 }

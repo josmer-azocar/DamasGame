@@ -106,6 +106,7 @@
     <ClInclude Include="GameManager.h">
       <Filter>02_BusinessLogicLayer\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="include\nlohmann\json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\lang\en.json">
@@ -114,5 +115,6 @@
     <None Include="resources\lang\es.json">
       <Filter>01_PresentationLayer\resources\lang</Filter>
     </None>
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
 </Project>
