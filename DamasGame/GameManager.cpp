@@ -110,16 +110,14 @@ void GameManager::ShowMainMenu() {
 void GameManager::ShowGlobalStats() {
 	mView.SetMenuColorsAndClear();
 	// Asegurar que GoToXY está disponible o ConsoleView lo maneja internamente
+	
+
 	GoToXY(0, 1); // Posicionar un poco más abajo del inicio para que el título no quede pegado arriba
 	mFileHandler.displayGameHistory(); // Asume que displayGameHistory maneja su propio GoToXY si es necesario para el contenido
 
-	// Posicionar el mensaje "Presione Enter" de forma consistente
-	int pressEnterY = 20; // O calcular basado en la altura del historial
-	GoToXY(0, pressEnterY);
-	mView.ClearLines(pressEnterY, 1, CONSOLE_WIDTH_ASSUMED);
-	GoToXY(0, pressEnterY);
+	// Mensaje "Presione Enter" 
 	mView.DisplayMessage(m_i18n.GetString("press_enter_to_menu"), true, CONSOLE_COLOR_LIGHT_CYAN); // Añadido color
-	if (std::cin.peek() == '\n') std::cin.ignore();
+	if (std::cin.peek() == '\n');
 	std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 }
 void GameManager::StartNewGame() {
