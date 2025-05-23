@@ -1,4 +1,5 @@
 ﻿// GameManager.cpp
+// Implementacion de la clase GameManager, que controla el flujo principal del juego de damas
 #include "LocalizationManager.h"
 #include "GameManager.h"
 #include "ConsoleView.h"
@@ -23,10 +24,13 @@
 #include <iomanip>   // Para std::put_time
 #include <sstream>   // Para std::ostringstream
 
+// Constantes para el manejo visual de la consola y el tablero
 const int GAME_TITLE_LINES = 4;
 const int BOARD_VISUAL_HEIGHT = 1 + 1 + (Board::BOARD_SIZE * 2 - 1) + 1;
 const int CONSOLE_WIDTH_ASSUMED = 80;
 
+// Constructor de GameManager
+// Inicializa referencias a los objetos principales del juego y variables de estado
 GameManager::GameManager(Board& board, InputHandler& inputHandler)
 	: mGameBoard(board),
 	m_i18n(), 
@@ -45,11 +49,15 @@ GameManager::GameManager(Board& board, InputHandler& inputHandler)
 	m_player2(nullptr),
 	m_currentPlayerObject(nullptr)
 {
+	// Aqui se puede agregar inicializacion adicional si es necesario
 }
 
+// Destructor de GameManager
+// Libera recursos si es necesario (en este caso, los smart pointers lo hacen automaticamente)
 GameManager::~GameManager() {
 }
 
+// Obtiene la fecha y hora actual como string segun el formato especificado
 std::string GameManager::getCurrentDateTime(const std::string& format_string) {
 	auto now = std::chrono::system_clock::now();
 	std::time_t now_time_t = std::chrono::system_clock::to_time_t(now);
@@ -58,15 +66,15 @@ std::string GameManager::getCurrentDateTime(const std::string& format_string) {
 #ifdef _WIN32
 	localtime_s(&now_tm, &now_time_t);
 #else
-	// localtime es sensible al hilo en algunos sistemas, localtime_r es más seguro si está disponible
-	// pero para este caso, un localtime simple debería estar bien.
+	// localtime es sensible al hilo en algunos sistemas, localtime_r es mas seguro si esta disponible
+	// pero para este caso, un localtime simple deberia estar bien.
 	std::tm* temp_tm = std::localtime(&now_time_t);
 	if (temp_tm != nullptr) {
 		now_tm = *temp_tm;
 	}
 	else {
 		// Manejar error si localtime devuelve nullptr
-		// Podrías lanzar una excepción o devolver una cadena de error.
+		// Podrias lanzar una excepcion o devolver una cadena de error.
 		return "Error:localtime";
 	}
 #endif
@@ -76,11 +84,13 @@ std::string GameManager::getCurrentDateTime(const std::string& format_string) {
 	return oss.str();
 }
 
+// Inicializa la aplicacion, permitiendo seleccionar el idioma y mostrando el menu principal
 void GameManager::InitializeApplication() { 
-	m_i18n.SelectLanguageUI(mView, mInputHandler); //Menu de seleccion de idiomas
-	
-	ShowMainMenu(); }
+	m_i18n.SelectLanguageUI(mView, mInputHandler); // Menu de seleccion de idiomas
+	ShowMainMenu(); 
+}
 
+// Muestra el menu principal y gestiona la seleccion de modo de juego o salida
 void GameManager::ShowMainMenu() {
 	int selectedOption = 1;
 	const int numMenuOptions = 5;
@@ -107,19 +117,20 @@ void GameManager::ShowMainMenu() {
 		else if (choice < 0) { selectedOption = -choice; }
 	}
 }
+
+// Muestra las estadisticas globales de partidas anteriores usando el FileHandler
 void GameManager::ShowGlobalStats() {
 	mView.SetMenuColorsAndClear();
-	// Asegurar que GoToXY está disponible o ConsoleView lo maneja internamente
-	
-
-	GoToXY(0, 1); // Posicionar un poco más abajo del inicio para que el título no quede pegado arriba
+	// Asegura que GoToXY esta disponible o ConsoleView lo maneja internamente
+	GoToXY(0, 1); // Posicionar un poco mas abajo del inicio para que el titulo no quede pegado arriba
 	mFileHandler.displayGameHistory(); // Asume que displayGameHistory maneja su propio GoToXY si es necesario para el contenido
-
 	// Mensaje "Presione Enter" 
-	mView.DisplayMessage(m_i18n.GetString("press_enter_to_menu"), true, CONSOLE_COLOR_LIGHT_CYAN); // Añadido color
+	mView.DisplayMessage(m_i18n.GetString("press_enter_to_menu"), true, CONSOLE_COLOR_LIGHT_CYAN); // Aniadido color
 	if (std::cin.peek() == '\n');
 	std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 }
+
+// Inicia una nueva partida, reseteando el tablero y el estado del juego segun el modo seleccionado
 void GameManager::StartNewGame() {
 	mGameBoard.InitializeBoard();
 	mCurrentPlayerTurnColor = PlayerColor::PLAYER_1;
@@ -145,6 +156,8 @@ void GameManager::StartNewGame() {
 	}
 	m_currentPlayerObject = m_player1.get();
 }
+
+// Ejecuta el bucle principal del juego, mostrando el titulo, reglas y procesando turnos hasta que el juego termine
 void GameManager::RunGameLoop() {
 	if (mCurrentGameMode == GameMode::NONE || !m_player1 || !m_player2) {
 		mView.DisplayMessage(m_i18n.GetString("error_game_not_init"), true, CONSOLE_COLOR_RED, CONSOLE_COLOR_BLACK);
@@ -163,6 +176,8 @@ void GameManager::RunGameLoop() {
 	mIsGameOver = false;
 	while (!mIsGameOver) { ProcessPlayerTurn(); } AnnounceResult();
 }
+
+// Muestra las estadisticas actuales de la partida en la consola
 void GameManager::DisplayCurrentStats() {
 	int statsY = GAME_TITLE_LINES + BOARD_VISUAL_HEIGHT + 7;
 	GoToXY(0, statsY); mView.ClearLines(statsY, 6, CONSOLE_WIDTH_ASSUMED); GoToXY(0, statsY);
@@ -174,12 +189,15 @@ void GameManager::DisplayCurrentStats() {
 	mView.DisplayMessage(PlayerColorToString(PlayerColor::PLAYER_2, m_i18n) + ": " + std::to_string(p2p) + " (" + std::to_string(p2m) + "p, " + std::to_string(p2k) + "D). Capt: " + std::to_string(mGameStats.player2CapturedCount), true, CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
 	mView.DisplayMessage("-----------------------------", true, CONSOLE_COLOR_YELLOW, CONSOLE_COLOR_BLACK);
 }
+
+// Muestra el ultimo movimiento realizado en la partida
 void GameManager::DisplayLastMove() {
 	int lastMoveY = GAME_TITLE_LINES + BOARD_VISUAL_HEIGHT;
 	GoToXY(0, lastMoveY); mView.ClearLines(lastMoveY, 1, CONSOLE_WIDTH_ASSUMED); GoToXY(0, lastMoveY);
 	if (!mLastMove.IsNull()) { mView.DisplayMessage(m_i18n.GetString("last_move") + mLastMove.ToNotation(m_i18n), true, CONSOLE_COLOR_WHITE, CONSOLE_COLOR_BLACK); }
 }
 
+// Procesa el turno del jugador actual, incluyendo entrada de movimiento y validacion
 void GameManager::ProcessPlayerTurn() {
 	bool turnActionSuccessfullyCompleted = false;
 	while (!turnActionSuccessfullyCompleted && !mIsGameOver) {
@@ -466,6 +484,8 @@ void GameManager::SwitchPlayer() {
 		m_currentPlayerObject = (mCurrentPlayerTurnColor == PlayerColor::PLAYER_1) ? m_player1.get() : m_player2.get();
 	}
 }
+
+// Anuncia el resultado final de la partida y muestra las estadisticas
 void GameManager::AnnounceResult() {
 	int finalMessageStartY = GAME_TITLE_LINES; GoToXY(0, finalMessageStartY);
 	mView.ClearLines(finalMessageStartY, BOARD_VISUAL_HEIGHT + 20, CONSOLE_WIDTH_ASSUMED); GoToXY(0, finalMessageStartY);

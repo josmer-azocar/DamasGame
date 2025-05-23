@@ -18,3 +18,4 @@
 2025-05-22 15:29:22;Computer vs Computer;N/A;The observer left the game.;49;11;8
 2025-05-22 16:47:47;Humano vs Humano;Negras (b);Blancas (w) salido de la partida.;1;0;0
 2025-05-22 17:05:18;Humano vs Computadora;Blancas (w);Negras (b) se quedo sin fichas.;47;12;6
+2025-05-22 19:52:52;Computadora vs Computadora;Blancas (w);Negras (b) se quedo sin fichas.;41;12;6

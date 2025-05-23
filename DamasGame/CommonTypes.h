@@ -11,14 +11,16 @@
 
 #include "LocalizationManager.h" 
 
-// Definición de PlayerColor
+// Definicion de PlayerColor
+// Enumera los colores disponibles para los jugadores
 enum class PlayerColor {
 	PLAYER_1, // Blancas (w)
 	PLAYER_2, // Negras (b)
 	NONE
 };
 
-// Definición de PieceType
+// Definicion de PieceType
+// Enumera los tipos de piezas y sus respectivas versiones (normal y rey)
 enum class PieceType {
 	P1_MAN, P1_KING,
 	P2_MAN, P2_KING,
@@ -26,17 +28,19 @@ enum class PieceType {
 };
 
 // Estructura MoveInput
+// Estructura para manejar la entrada del movimiento del jugador
 struct MoveInput {
-	int startRow = -1;
-	int startCol = -1;
-	int endRow = -1;
-	int endCol = -1;
-	bool isValidFormat = false;
-	bool wantsToExit = false;
-	bool wantsToShowStats = false;
+	int startRow = -1; // Fila de inicio
+	int startCol = -1; // Columna de inicio
+	int endRow = -1;   // Fila de destino
+	int endCol = -1;   // Columna de destino
+	bool isValidFormat = false; // Indica si el formato de movimiento es valido
+	bool wantsToExit = false;   // Indica si el jugador quiere salir
+	bool wantsToShowStats = false; // Indica si el jugador quiere ver las estadisticas
 };
 
-// ToAlgebraic no necesita localización
+// ToAlgebraic no necesita localizacion
+// Convierte coordenadas de fila y columna a notacion algebraica
 inline std::string ToAlgebraic(int r, int c) {
 	if (r < 0 || r > 7 || c < 0 || c > 7) {
 		return "??";
@@ -49,7 +53,8 @@ inline std::string ToAlgebraic(int r, int c) {
 	return s;
 }
 
-// --- PlayerColorToString IMPLEMENTACIÓN INLINE ---
+// --- PlayerColorToString IMPLEMENTACION INLINE ---
+// Convierte un color de jugador a una cadena localizada
 inline std::string PlayerColorToString(PlayerColor color, const LocalizationManager& i18n) {
 	std::string key;
 	switch (color) {
@@ -62,19 +67,21 @@ inline std::string PlayerColorToString(PlayerColor color, const LocalizationMana
 }
 
 // Estructura Move
+// Representa un movimiento en el juego, incluyendo la posicion inicial y final, la pieza movida, y el color del jugador
 struct Move {
-	int startR_ = -1;
-	int startC_ = -1;
-	int endR_ = -1;
-	int endC_ = -1;
-	PieceType pieceMoved_ = PieceType::EMPTY;
-	PlayerColor playerColor_ = PlayerColor::NONE;
-	bool isCapture_ = false;
+	int startR_ = -1; // Fila de inicio
+	int startC_ = -1; // Columna de inicio
+	int endR_ = -1;   // Fila de destino
+	int endC_ = -1;   // Columna de destino
+	PieceType pieceMoved_ = PieceType::EMPTY; // Tipo de pieza que se mueve
+	PlayerColor playerColor_ = PlayerColor::NONE; // Color del jugador que realiza el movimiento
+	bool isCapture_ = false; // Indica si el movimiento es una captura
 
 	Move() = default;
 	bool IsNull() const { return startR_ == -1; }
 
-	//  ToNotation IMPLEMENTACIÓN INLINE 
+	//  ToNotation IMPLEMENTACION INLINE 
+	// Convierte el movimiento a una notacion legible por humanos
 	inline std::string ToNotation(const LocalizationManager& i18n) const {
 		if (IsNull()) return i18n.GetString("move_notation_null");
 
@@ -94,22 +101,24 @@ struct Move {
 	}
 };
 
-// Definición de GameOverReason
+// Definicion de GameOverReason
+// Enumera las posibles razones por las que puede terminar una partida
 enum class GameOverReason {
-	NONE,
-	NO_PIECES,
-	NO_MOVES,
-	PLAYER_EXIT,
-	STALEMATE_BY_RULES
+	NONE,               // No ha terminado
+	NO_PIECES,          // Un jugador se quedo sin piezas
+	NO_MOVES,           // Un jugador no tiene movimientos validos
+	PLAYER_EXIT,        // Un jugador decidio salir
+	STALEMATE_BY_RULES  // Empate por reglas
 };
 
-// Definición de GameStats
+// Definicion de GameStats
+// Estructura que almacena estadisticas de la partida en curso
 struct GameStats {
-	int player1CapturedCount = 0;
-	int player2CapturedCount = 0;
-	int currentTurnNumber = 1;
-	PlayerColor winner = PlayerColor::NONE;
-	GameOverReason reason = GameOverReason::NONE;
+	int player1CapturedCount = 0;    // Cantidad de piezas capturadas por el jugador 1
+	int player2CapturedCount = 0;    // Cantidad de piezas capturadas por el jugador 2
+	int currentTurnNumber = 1;       // Numero de turno actual
+	PlayerColor winner = PlayerColor::NONE; // Color del ganador (si lo hay)
+	GameOverReason reason = GameOverReason::NONE; // Razon por la que termino la partida
 };
 
 #endif // COMMON_TYPES_H

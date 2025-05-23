@@ -1,42 +1,40 @@
-// Board.cpp
-
 #include "Board.h"       
 #include "CommonTypes.h" // Para PieceType, PlayerColor
 
 #include <stdexcept>     // Para std::out_of_range
 #include <iostream>      // Para std::cout 
 
-
-// --- Implementación del Constructor ---
+// --- Implementacion del Constructor ---
+// Inicializa el tablero vacio y resetea los contadores de piezas
 Board::Board() {
 	ClearBoard();
 	ResetPieceCounts();
 }
 
-// --- Implementación de Métodos Públicos ---
+// --- Implementacion de Metodos Publicos ---
 
+// Inicializa el tablero con la posicion inicial de las piezas
 void Board::InitializeBoard() {
 	ClearBoard();
 	ResetPieceCounts();
 
-	// P1 (Blancas) empiezan ABAJO (filas de índice alto: 5, 6, 7 si 0 es arriba)
-	// P2 (Negras) empiezan ARRIBA (filas de índice bajo: 0, 1, 2 si 0 es arriba)
+	// P1 (Blancas) empiezan abajo (filas de indice alto: 5, 6, 7 si 0 es arriba)
+	// P2 (Negras) empiezan arriba (filas de indice bajo: 0, 1, 2 si 0 es arriba)
 	for (int row = 0; row < BOARD_SIZE; ++row) {
 		for (int col = 0; col < BOARD_SIZE; ++col) {
 			if ((row % 2) != (col % 2)) { // Casillas jugables (oscuras)
-
 				if (row < 3) { // Primeras 3 filas para Jugador 2 (Negras)
 					SetPieceAt(row, col, PieceType::P2_MAN);
 				}
-				else if (row >= BOARD_SIZE - 3) { // Últimas 3 filas para Jugador 1 (Blancas)
+				else if (row >= BOARD_SIZE - 3) { // Ultimas 3 filas para Jugador 1 (Blancas)
 					SetPieceAt(row, col, PieceType::P1_MAN);
 				}
-
 			}
 		}
 	}
 }
 
+// Devuelve el tipo de pieza en la posicion indicada, o EMPTY si esta fuera de rango
 PieceType Board::GetPieceAt(int row, int col) const {
 	if (!IsWithinBounds(row, col)) {
 		return PieceType::EMPTY;
@@ -44,6 +42,7 @@ PieceType Board::GetPieceAt(int row, int col) const {
 	return mGrid[row][col];
 }
 
+// Coloca una pieza en la posicion indicada y actualiza los contadores
 void Board::SetPieceAt(int row, int col, PieceType pieceType) {
 	if (!IsWithinBounds(row, col)) {
 		throw std::out_of_range("Board::SetPieceAt: Coordenadas fuera de rango.");
@@ -53,49 +52,54 @@ void Board::SetPieceAt(int row, int col, PieceType pieceType) {
 	UpdateCountsForSetPiece(row, col, oldPiece, pieceType);
 }
 
+// Verifica si la posicion esta dentro de los limites del tablero
 bool Board::IsWithinBounds(int row, int col) const {
 	return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 }
 
+// Verifica si la casilla es jugable (oscura)
 bool Board::IsPlayableSquare(int row, int col) const {
 	if (!IsWithinBounds(row, col)) {
 		return false;
 	}
-	// Si (0,0) es casilla CLARA (no jugable), entonces las jugables (oscuras) son (row + col) % 2 != 0
+	// Si (0,0) es casilla clara (no jugable), entonces las jugables (oscuras) son (row + col) % 2 != 0
 	// O equivalentemente, row % 2 != col % 2
 	return (row % 2) != (col % 2);
 }
 
+// Devuelve la cantidad total de piezas (peones + damas) de un jugador
 int Board::GetPieceCount(PlayerColor player) const {
 	int playerIndex = (player == PlayerColor::PLAYER_1) ? 0 : ((player == PlayerColor::PLAYER_2) ? 1 : -1);
 	if (playerIndex == -1) return 0;
 	return mPieceCounts[playerIndex][0] + mPieceCounts[playerIndex][1];
 }
 
+// Devuelve la cantidad de damas (reyes) de un jugador
 int Board::GetKingCount(PlayerColor player) const {
 	int playerIndex = (player == PlayerColor::PLAYER_1) ? 0 : ((player == PlayerColor::PLAYER_2) ? 1 : -1);
 	if (playerIndex == -1) return 0;
 	return mPieceCounts[playerIndex][1];
 }
 
+// Promueve una pieza a dama si llega a la fila de coronacion
 void Board::PromotePieceIfNecessary(int row, int col) {
 	if (!IsWithinBounds(row, col)) {
 		return;
 	}
 	PieceType currentPiece = GetPieceAt(row, col);
 
-
-	// P1_MAN (Negras, arriba) corona en BOARD_SIZE - 1 (fila 7)
+	// P1_MAN (Blancas) corona en la fila 0 (arriba)
 	if (currentPiece == PieceType::P1_MAN && row == 0) {
 		SetPieceAt(row, col, PieceType::P1_KING);
 	}
-	// P2_MAN (Negras, arriba) corona en la fila BOARD_SIZE - 1 (fila inferior del tablero, índice 7)
+	// P2_MAN (Negras) corona en la fila BOARD_SIZE - 1 (abajo)
 	else if (currentPiece == PieceType::P2_MAN && row == BOARD_SIZE - 1) {
 		SetPieceAt(row, col, PieceType::P2_KING);
 	}
 }
 
-// --- Implementación de Métodos Privados ---
+// --- Implementacion de Metodos Privados ---
+// Limpia el tablero, dejando todas las casillas vacias
 void Board::ClearBoard() {
 	for (int r = 0; r < BOARD_SIZE; ++r) {
 		for (int c = 0; c < BOARD_SIZE; ++c) {
@@ -104,6 +108,7 @@ void Board::ClearBoard() {
 	}
 }
 
+// Resetea los contadores de piezas de ambos jugadores
 void Board::ResetPieceCounts() {
 	for (int i = 0; i < 2; ++i) {
 		for (int j = 0; j < 2; ++j) {
@@ -112,6 +117,7 @@ void Board::ResetPieceCounts() {
 	}
 }
 
+// Actualiza los contadores de piezas al cambiar una pieza en el tablero
 void Board::UpdateCountsForSetPiece(int r, int c, PieceType oldPiece, PieceType newPiece) {
 	int playerIndexOld = -1, pieceTypeIndexOld = -1;
 	if (oldPiece == PieceType::P1_MAN) { playerIndexOld = 0; pieceTypeIndexOld = 0; }

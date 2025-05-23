@@ -1,3 +1,7 @@
+// Vista de consola para el juego de Damas
+// Esta clase y utilidades permiten mostrar el tablero, menus y mensajes en la consola de Windows
+// Los comentarios no contienen tildes para evitar problemas de codificacion
+
 #ifndef CONSOLE_VIEW_H
 #define CONSOLE_VIEW_H
 
@@ -6,27 +10,30 @@
 #include <vector>
 #include <iostream>
 
-class Board;
-class LocalizationManager;
+class Board; // Declaracion adelantada de la clase Board
+class LocalizationManager; // Declaracion adelantada para manejo de textos multilenguaje
+
 // --- CONSTANTES DE COLOR ---
-const int CONSOLE_COLOR_BLACK = 0;
-const int CONSOLE_COLOR_BLUE = 1;
-const int CONSOLE_COLOR_GREEN = 2;
-const int CONSOLE_COLOR_CYAN = 3;
-const int CONSOLE_COLOR_RED = 4;
-const int CONSOLE_COLOR_MAGENTA = 5;
-const int CONSOLE_COLOR_BROWN = 6;
-const int CONSOLE_COLOR_LIGHT_GRAY = 7;
-const int CONSOLE_COLOR_DARK_GRAY = 8;
-const int CONSOLE_COLOR_LIGHT_BLUE = 9;
-const int CONSOLE_COLOR_LIGHT_GREEN = 10;
-const int CONSOLE_COLOR_LIGHT_CYAN = 11;
-const int CONSOLE_COLOR_LIGHT_RED = 12;
-const int CONSOLE_COLOR_LIGHT_MAGENTA = 13;
-const int CONSOLE_COLOR_YELLOW = 14;
-const int CONSOLE_COLOR_WHITE = 15;
+// Definicion de constantes para los colores de la consola
+const int CONSOLE_COLOR_BLACK = 0;           // Negro
+const int CONSOLE_COLOR_BLUE = 1;            // Azul
+const int CONSOLE_COLOR_GREEN = 2;           // Verde
+const int CONSOLE_COLOR_CYAN = 3;            // Cyan
+const int CONSOLE_COLOR_RED = 4;             // Rojo
+const int CONSOLE_COLOR_MAGENTA = 5;         // Magenta
+const int CONSOLE_COLOR_BROWN = 6;           // Marron
+const int CONSOLE_COLOR_LIGHT_GRAY = 7;      // Gris claro
+const int CONSOLE_COLOR_DARK_GRAY = 8;       // Gris oscuro
+const int CONSOLE_COLOR_LIGHT_BLUE = 9;      // Azul claro
+const int CONSOLE_COLOR_LIGHT_GREEN = 10;    // Verde claro
+const int CONSOLE_COLOR_LIGHT_CYAN = 11;     // Cyan claro
+const int CONSOLE_COLOR_LIGHT_RED = 12;      // Rojo claro
+const int CONSOLE_COLOR_LIGHT_MAGENTA = 13;  // Magenta claro
+const int CONSOLE_COLOR_YELLOW = 14;         // Amarillo
+const int CONSOLE_COLOR_WHITE = 15;          // Blanco
 
 // --- FUNCIONES DE UTILIDAD DE CONSOLA ---
+// Mueve el cursor de la consola a la posicion (x, y)
 inline void GoToXY(int x, int y) {
 	COORD cursorPosition;
 	cursorPosition.X = static_cast<SHORT>(x);
@@ -34,54 +41,70 @@ inline void GoToXY(int x, int y) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPosition);
 }
 
-// SetConsoleTextColor ahora siempre toma el color de fondo deseado para el texto.
-// Si se quiere el fondo "global" actual, se debe pasar explícitamente.
+// Cambia el color del texto y fondo de la consola
+// foregroundColor: color del texto
+// backgroundColor: color de fondo
+// Si se desea el fondo actual, se debe pasar explicitamente
 inline void SetConsoleTextColor(int foregroundColor, int backgroundColor) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, foregroundColor | (backgroundColor << 4));
 }
 
-// Resetear al esquema de juego (negro)
+// Restaura los colores por defecto del juego (texto gris claro, fondo negro)
 inline void ResetConsoleColorsToGameDefault() {
 	SetConsoleTextColor(CONSOLE_COLOR_LIGHT_GRAY, CONSOLE_COLOR_BLACK);
 }
 
-// Resetear al esquema de menú (morado)
+// Restaura los colores por defecto del menu (texto blanco, fondo magenta)
 inline void ResetConsoleColorsToMenuDefault() {
 	SetConsoleTextColor(CONSOLE_COLOR_WHITE, CONSOLE_COLOR_MAGENTA);
 }
 
-
+// Clase que gestiona la visualizacion en consola del juego
 class ConsoleView {
 public:
+	// Constructor que recibe el manejador de textos multilenguaje
 	ConsoleView(const LocalizationManager& i18n);
 
-	// Establece colores y limpia para el MENÚ (fondo morado)
+	// Establece colores y limpia la pantalla para el menu principal (fondo magenta)
 	void SetMenuColorsAndClear() const;
-	// Establece colores y limpia para el JUEGO (fondo negro)
+	// Establece colores y limpia la pantalla para el juego (fondo negro)
 	void SetGameColorsAndClear() const;
 
+	// Muestra el menu principal y resalta la opcion seleccionada
 	void DisplayMainMenu(int selectedOption) const;
-	void DisplayBoard(const Board& gameBoard, int gameBgColor = CONSOLE_COLOR_BLACK) const; // Añadido gameBgColor
+	// Muestra el tablero de juego en la consola
+	// gameBoard: referencia al tablero actual
+	// gameBgColor: color de fondo del tablero (por defecto negro)
+	void DisplayBoard(const Board& gameBoard, int gameBgColor = CONSOLE_COLOR_BLACK) const;
 
-	// DisplayMessage ahora requiere el color de fondo explícito para el texto.
+	// Muestra un mensaje en la consola con colores especificos
+	// message: texto a mostrar
+	// newLine: si es true, agrega salto de linea
+	// fgColor: color de texto (-1 para usar el color actual)
+	// bgColor: color de fondo (-1 para usar el color actual)
 	void DisplayMessage(const std::string& message, bool newLine = true,
-		int fgColor = -1, // -1 para usar el color de texto por defecto del contexto
-		int bgColor = -1) const; // -1 para usar el color de fondo por defecto del contexto
+		int fgColor = -1, int bgColor = -1) const;
 
-	// ClearScreen ahora es más genérico y solo limpia
+	// Limpia toda la pantalla de la consola
 	void ClearScreen() const;
-	// Limpia una sección de la pantalla (útil para mensajes sin borrar todo)
+	// Limpia una seccion de la pantalla desde la linea startY por numLines lineas
+	// consoleWidth: ancho de la consola (por defecto 80)
 	void ClearLines(int startY, int numLines, int consoleWidth = 80) const;
 
+	// Muestra el menu de seleccion de idioma
+	// selectedOption: opcion resaltada
+	// title: titulo del menu
+	// opt1_text: texto de la opcion 1
+	// opt2_text: texto de la opcion 2
+	// instruction_text: instrucciones para el usuario
 	void DisplayLanguageSelectionMenu(int selectedOption,
 		const std::string& title,
 		const std::string& opt1_text,
 		const std::string& opt2_text,
 		const std::string& instruction_text) const;
 private:
-	const LocalizationManager& m_i18n;
-
+	const LocalizationManager& m_i18n; // Referencia al manejador de textos multilenguaje
 };
 
 #endif // CONSOLE_VIEW_H

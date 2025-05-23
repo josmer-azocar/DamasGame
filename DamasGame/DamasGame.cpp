@@ -6,6 +6,7 @@
 #include "Board.h"
 #include "GameManager.h"
 
+// Funcion principal
 int main() {
 	HANDLE hConsoleOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_CURSOR_INFO cursorInfo;
@@ -19,7 +20,7 @@ int main() {
 	InputHandler inputHandler;
 
 	GameManager game(gameBoard,inputHandler);
-
+	// Inicializar la aplicación
 	game.InitializeApplication(); // Esto maneja el menú y los bucles de juego
 
 	
